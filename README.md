@@ -21,6 +21,14 @@ python -m pip install https://github.com/kwhi6693-web/agent-xplat/releases/downl
 agent-xplat scan .
 ```
 
+After a formal release has been published to PyPI through Trusted Publishing,
+the standard install is:
+
+```bash
+python -m pip install agent-xplat
+agent-xplat scan .
+```
+
 ```text
 agent-xplat scan .
 ```
