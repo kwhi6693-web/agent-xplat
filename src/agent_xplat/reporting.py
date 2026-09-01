@@ -145,7 +145,7 @@ def render_markdown(result: ScanResult) -> str:
         "",
         "## Baseline Status",
         "",
-        f"- {result.baseline.get('status', 'NOT LOADED') if result.baseline else 'No baseline loaded.'}",
+        *_baseline_markdown(result),
         "",
     ]
     return "\n".join(lines)
@@ -165,6 +165,18 @@ def _contract_markdown(result: ScanResult) -> list[str]:
     if not violations:
         return [f"- {result.contract.get('status', 'NOT_DECLARED')}"]
     return [f"- `{item['target']}` declared `{item['declared']}` but detected `{', '.join(item['detected_assumptions'])}`." for item in violations]
+
+
+def _baseline_markdown(result: ScanResult) -> list[str]:
+    if not result.baseline:
+        return ["- No baseline loaded."]
+    lines = [
+        f"- Status: {result.baseline.get('status', 'UNKNOWN')}.",
+        f"- New findings: {result.baseline.get('new_count', 0)}; existing findings: {result.baseline.get('existing_count', 0)}; resolved findings: {result.baseline.get('resolved_count', 0)}.",
+    ]
+    for target_id, change in sorted(result.baseline.get("scores", {}).items()):
+        lines.append(f"- `{target_id}`: {change['before']}/100 -> {change['after']}/100 ({change['delta']:+d}).")
+    return lines
 
 
 def render_terminal(result: ScanResult, color: bool = False) -> str:
@@ -189,6 +201,15 @@ def render_terminal(result: ScanResult, color: bool = False) -> str:
             "--------",
         ]
     )
+    if result.baseline.get("scores"):
+        lines.extend(["", "Diff", "----", f"Regression status: {result.baseline.get('status', 'UNKNOWN')}"])
+        lines.append(f"New portability regressions: {result.baseline.get('new_count', 0)}")
+        lines.append(f"Resolved issues: {result.baseline.get('resolved_count', 0)}")
+        lines.append("Before / After scores")
+        for target in result.targets:
+            change = result.baseline["scores"].get(target.id)
+            if change:
+                lines.append(f"  {target.display_name}: {change['before']}/100 -> {change['after']}/100 ({change['delta']:+d})")
     for finding in result.active_findings:
         targets = ", ".join(finding.affected_targets)
         lines.append(f"{finding.location.path}:{finding.location.line}:{finding.location.column} {finding.rule_id} [{finding.severity.value}/{finding.confidence.value}]")

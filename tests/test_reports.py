@@ -39,3 +39,21 @@ def test_markdown_and_terminal_reports_include_matrix_and_actionable_sections(tm
     assert "AX-SHELL-001" in terminal
     assert "BLOCKER" in terminal
     assert "^^^^^" in terminal
+
+
+def test_diff_reports_show_before_after_scores_and_regressions(tmp_path: Path):
+    result = _result(tmp_path)
+    result.baseline = {
+        "status": "REGRESSION",
+        "new_count": 2,
+        "existing_count": 1,
+        "resolved_count": 3,
+        "scores": {"windows-powershell": {"before": 93, "after": 81, "delta": -12}},
+    }
+    markdown = render_markdown(result)
+    terminal = render_terminal(result)
+    assert "New findings: 2" in markdown
+    assert "93/100 -> 81/100 (-12)" in markdown
+    assert "New portability regressions: 2" in terminal
+    assert "Before / After scores" in terminal
+    assert "Windows / PowerShell: 93/100 -> 81/100 (-12)" in terminal
