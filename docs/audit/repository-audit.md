@@ -1,5 +1,7 @@
 # Repository Audit
 
+> Historical note: this audit run was completed before the formal `v1.0.0` tag and GitHub Release. The current public-launch destination readback is recorded in [public-launch-readback.md](public-launch-readback.md).
+
 Audit run: `VX-2026-09-01-004`
 Scope: post-hardening source, tests, documentation, CI, packaging metadata, release templates, public repository readback, hosted artifacts, and final release evidence.
 Repository target: public `https://github.com/kwhi6693-web/agent-xplat`, branch `master`; source commit read back as `6b4ae053d7df0f0abacd064096b8f32c540ee00d`.
