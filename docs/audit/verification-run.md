@@ -45,5 +45,41 @@ Static findings remain `INFERRED`. The local runtime artifact records only the c
 
 - Wheel: `agent_xplat-1.0.0-py3-none-any.whl` from the external build directory
 - Size: `71128` bytes
-- SHA-256: `969021edd9e719b06aceb467c5db9d3939756a715226c3ceaa3493e846b8f53e`
+- SHA-256: `8042a15b661de4a1c5ea54731b012839bd6c510c6c50e460e07dcaa703ebcdaa`
 - Metadata readback: package `agent-xplat`, version `1.0.0`, Python `>=3.10`, and the three bounded Tree-sitter runtime dependencies.
+
+## Hosted runner evidence
+
+Hosted verification record: `VX-2026-09-01-004`
+Repository: `https://github.com/kwhi6693-web/agent-xplat`
+Workflow run: [33511871082](https://github.com/kwhi6693-web/agent-xplat/actions/runs/33511871082)
+Workflow event: `push` to `master`
+Workflow head SHA: `6b4ae053d7df0f0abacd064096b8f32c540ee00d`
+Lifecycle: `AUDITED`
+Overall result: `PASS`
+
+| GitHub-hosted job | Job ID | Result | Runtime environment | Project test evidence |
+|---|---:|---|---|---|
+| `windows-latest` | `99869261153` | PASS | `windows-powershell` / Windows | `88 passed in 1.45s` |
+| `macos-latest` | `99869261464` | PASS | `macos-zsh` / macOS | `88 passed in 0.79s` |
+| `ubuntu-latest` | `99869261505` | PASS | `linux-bash` / Linux | `88 passed in 0.73s` |
+
+Each job completed install, tests, static scan, controlled runtime verification, Markdown report, SARIF report, artifact upload, SARIF upload, and the workflow gates without a failed step. The enforcement steps were skipped after their preceding checks passed; this is the expected conditional path, not an unrun required check.
+
+### Hosted evidence classification
+
+- E4 — GitHub-hosted runner execution and independently downloaded artifacts: `VALID`, `PASS` for Windows, macOS, and Linux.
+- Static `agent-xplat-scan.json` and `agent-xplat.sarif` remain `INFERRED`; no static artifact is treated as runtime proof.
+- `agent-xplat-verification.json` is `RUNTIME` / `VERIFIED` and records only its corresponding hosted OS and shell/runtime class.
+
+### Artifact readback
+
+The GitHub Actions artifact API returned three non-expired artifacts, each bound to workflow run `33511871082` and head SHA `6b4ae053d7df0f0abacd064096b8f32c540ee00d`:
+
+| Artifact | Contents | Readback |
+|---|---|---|
+| `agent-xplat-windows-latest` | JSON, SARIF, Markdown, runtime evidence | All files non-empty; project JSON/SARIF validators passed; runtime status `VERIFIED`, `verified_os: [windows]` |
+| `agent-xplat-macos-latest` | JSON, SARIF, Markdown, runtime evidence | All files non-empty; project JSON/SARIF validators passed; runtime status `VERIFIED`, `verified_os: [macos]` |
+| `agent-xplat-ubuntu-latest` | JSON, SARIF, Markdown, runtime evidence | All files non-empty; project JSON/SARIF validators passed; runtime status `VERIFIED`, `verified_os: [linux]` |
+
+The downloaded file hashes were recorded in the release evidence outside source control. The public workflow file and README blob hashes also matched the local commit readback. The generated verified badge was accepted only after all three OS evidence files were combined and validated; the SVG readback contained `Cross-OS Verified` and the three OS labels.

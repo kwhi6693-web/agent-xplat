@@ -19,7 +19,7 @@ This repository implements the active task in `docs/task-specification.md`.
 | Tests | `python -m pytest -q` | Current count is recorded in `docs/audit/verification-run.md` |
 | Build | `python -m pip wheel . --no-deps --wheel-dir <external-build-dir>` | Verified locally: wheel `1.0.0` |
 | Static scan | `python -m agent_xplat scan .` | Verified locally: clean self-scan |
-| Runtime verification | `python -m agent_xplat test .` | Verified on current Windows/PowerShell host only; hosted matrix pending |
+| Runtime verification | `python -m agent_xplat test .` | Verified on the current Windows/PowerShell host and by the recorded GitHub-hosted Windows/macOS/Linux matrix; static results remain inferred |
 
 ## Scope controls
 

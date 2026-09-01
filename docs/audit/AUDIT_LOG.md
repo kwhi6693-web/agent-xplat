@@ -16,3 +16,21 @@ This append-only log records factual run and gate references. It does not replac
 - Basis: AC-12 requires actual hosted Windows/macOS/Linux runner results, which are not available in this local worktree
 - Governance applicability: `NOT REQUIRED` for this local release-candidate assessment because no external release, publication, deployment, or governed write was requested or performed
 - Package: `docs/audit/gate-decision-package.md`
+
+## `AUDIT-VX-2026-09-01-004`
+
+- Run ID: `VX-2026-09-01-004`
+- Scope: public repository creation and branch push, GitHub-hosted Windows/macOS/Linux workflow execution, job/step readback, artifact download/validation, final local regression, isolated package build/install, badge readback, security audit, repository audit, and README claim audit
+- Repository / target: `https://github.com/kwhi6693-web/agent-xplat`, default branch `master`
+- Source head verified by remote readback: `6b4ae053d7df0f0abacd064096b8f32c540ee00d`
+- Result: `PASS`; `windows-latest`, `macos-latest`, and `ubuntu-latest` jobs all passed; each recorded `RUNTIME` / `VERIFIED` evidence for its corresponding OS and kept static scan results `INFERRED`
+- Evidence: hosted run [33511871082](https://github.com/kwhi6693-web/agent-xplat/actions/runs/33511871082), artifact API/readback records, and `docs/audit/verification-run.md`
+
+## `AUDIT-GATE-2026-09-01-004`
+
+- Gate Decision Package: `GDP-AGENT-XPLAT-2026-09-01-004`
+- Gate result: Completion `PASS`; Delivery `PASS`; Release `PASS`
+- Basis: AC-01 through AC-12, Required DoD, final local checks, public remote readback, hosted three-OS job results, and artifact validation all passed for the frozen v1.0 scope
+- Governance applicability: `REQUIRED` under the public-repository publication rule; the bounded action was explicitly authorized by the current user request and no formal tag/release asset was published
+- Final Governance decision: `APPROVED` for the authorized bounded repository push and hosted evidence readback
+- Package: `docs/audit/gate-decision-package.md`

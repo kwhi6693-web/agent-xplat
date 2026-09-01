@@ -15,4 +15,4 @@ All notable changes to agent-xplat are documented here.
 
 ### Verification note
 
-This source release includes the three-runner workflow. Hosted Windows/macOS/Linux results must be collected in the target GitHub repository before claiming runtime cross-OS verification.
+The three-runner workflow was executed in the public repository at [run 33511871082](https://github.com/kwhi6693-web/agent-xplat/actions/runs/33511871082) for source commit `6b4ae053d7df0f0abacd064096b8f32c540ee00d`. Windows, macOS, and Linux jobs passed and their JSON, SARIF, Markdown, and runtime artifacts were read back. Static findings remain `INFERRED`; only the recorded runner evidence is `VERIFIED`.

@@ -1,8 +1,8 @@
 # Repository Audit
 
-Audit run: `VX-2026-09-01-003`
-Scope: post-hardening source, tests, documentation, CI, packaging metadata, release templates, and generated release artifacts.
-Repository target: the current local project worktree; no external write or publication was performed.
+Audit run: `VX-2026-09-01-004`
+Scope: post-hardening source, tests, documentation, CI, packaging metadata, release templates, public repository readback, hosted artifacts, and final release evidence.
+Repository target: public `https://github.com/kwhi6693-web/agent-xplat`, branch `master`; source commit read back as `6b4ae053d7df0f0abacd064096b8f32c540ee00d`.
 
 | Check | Evidence method | Result |
 |---|---|---|
@@ -15,7 +15,8 @@ Repository target: the current local project worktree; no external write or publ
 | Dependency surface and licenses | `pyproject.toml`, built wheel metadata, isolated install, and dependency metadata | PASS; runtime dependencies are limited to `tree-sitter`, `tree-sitter-javascript`, and `tree-sitter-typescript` with bounded minor-version ranges; `pytest` is development-only. The parser dependency decision and license notes are recorded in ADR 0002. |
 | Package metadata and entry point | `pyproject.toml`, `agent-xplat --version`, isolated editable/wheel installs | PASS; package version `1.0.0`, Python `>=3.10`, and the console entry point work in isolated Windows environments. |
 | README command/function claims | `tests/test_documentation_contract.py`, command probes, manual readback | PASS for locally testable claims; JavaScript/TypeScript AST support and dependency requirements are current; hosted verification claims remain explicitly qualified. |
-| GitHub Actions | `.github/workflows/agent-xplat.yml` inspection | PASS for workflow definition; execution result is UNVERIFIED until the workflow runs in a GitHub repository and its artifacts are read back. |
+| GitHub Actions | `.github/workflows/agent-xplat.yml`, run/job/step readback, artifact API, and downloaded artifact validators | PASS; run [33511871082](https://github.com/kwhi6693-web/agent-xplat/actions/runs/33511871082) passed on all three hosted runners; each job produced non-empty JSON/SARIF/Markdown/runtime artifacts bound to the run head SHA. |
+| Public remote readback | `git ls-remote`, GitHub repository API, public workflow/README blob hashes | PASS; repository is public, default branch is `master`, remote branch equals the pushed commit, and workflow/README blob hashes match the local commit. |
 | Release configuration | `.github/release.yml`, release-notes template, changelog | PASS; no publish action was performed. |
 | Scope control | Task specification and worktree inspection | PASS; only the `agent-xplat` project and its release evidence were changed; protected system/application paths were not modified. |
 
@@ -25,6 +26,6 @@ Repository target: the current local project worktree; no external write or publ
 - No plugin was installed; the project needs no connector or AI service. Its parser dependencies are ordinary package dependencies documented in the project metadata.
 - No public third-party repository was scanned, so no third-party license or endorsement claim was introduced.
 
-## Evidence still needed
+## Evidence status
 
-Run `.github/workflows/agent-xplat.yml` in the target GitHub repository and retain the three matrix job results plus JSON/SARIF/Markdown/runtime artifacts. That evidence is required before a `READY FOR RELEASE` claim.
+No remaining v1.0 release evidence gap is identified. The hosted run, job/step results, artifact API records, downloaded artifact hashes, public branch readback, and final local regression evidence are retained outside source control and summarized in `docs/audit/verification-run.md`. No formal version tag or GitHub Release asset was created because the requested action was repository creation, branch push, and Release Gate verification.
