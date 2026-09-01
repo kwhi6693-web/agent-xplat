@@ -16,7 +16,7 @@ This repository implements the active task in `docs/task-specification.md`.
 | Operation | Command | Status |
 |---|---|---|
 | Install editable | `python -m pip install -e ".[dev]"` | Verified locally |
-| Tests | `python -m pytest -q` | Verified locally: 53 passed |
+| Tests | `python -m pytest -q` | Verified locally: 54 passed |
 | Build | `python -m pip wheel . --no-deps --wheel-dir <external-build-dir>` | Verified locally: wheel `1.0.0` |
 | Static scan | `python -m agent_xplat scan .` | Verified locally: clean self-scan |
 | Runtime verification | `python -m agent_xplat test .` | Verified on current Windows/PowerShell host only; hosted matrix pending |

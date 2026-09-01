@@ -11,7 +11,7 @@ Execution scope: local Windows host plus isolated package installation
 |---|---|
 | `python -m compileall -q src` | PASS |
 | `git diff --check` | PASS |
-| `python -m pytest -q` | PASS — 53 passed |
+| `python -m pytest -q` | PASS — 54 passed |
 | `python -m pip wheel . --no-deps --wheel-dir <external-build-dir>` | PASS — `agent_xplat-1.0.0-py3-none-any.whl` |
 | `agent-xplat --version` | PASS — `1.0.0` |
 | All ten subcommand `--help` probes | PASS |
@@ -22,7 +22,7 @@ Execution scope: local Windows host plus isolated package installation
 | Baseline clean scan | PASS — `CLEAN`, zero new findings |
 | Baseline regression scan | PASS — `REGRESSION`, new findings blocked with exit code 1 |
 | `fix --dry-run` on mixed fixture | PASS — no files modified; no safe fixes available |
-| `agent-xplat test . --format json` | VERIFIED on current Windows/PowerShell host; project command exited 0 with 53 passed |
+| `agent-xplat test . --format json` | VERIFIED on current Windows/PowerShell host; project command exited 0 with 54 passed |
 | Isolated wheel install and scan of portable fixture | PASS — installed without runtime dependencies; JSON output valid and no active findings |
 | `init`, `init-ci`, and static badge generation | PASS; generated files read back and inspected |
 | Runtime-verified badge without three-OS evidence | PASS negative test — refused with configuration/input exit code 2 |
