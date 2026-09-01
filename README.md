@@ -1,8 +1,25 @@
 # agent-xplat
 
-## Find the OS assumptions that break AI-agent workflows.
+[![Cross-OS Verified](docs/assets/agent-xplat-verified.svg)](https://github.com/kwhi6693-web/agent-xplat/actions/workflows/agent-xplat.yml)
+
+Find the OS assumptions that break AI-agent workflows.
+
+Windows ✓<br>
+macOS ✓<br>
+Linux ✓
+
+Verified on real GitHub-hosted runners. The hosted jobs exercise Windows PowerShell, macOS zsh, and Linux bash; the static scan covers the full eight-target OS × Shell × Runtime matrix.
 
 `agent-xplat` is a deterministic cross-OS portability checker for AI agent workflows, Agent Skills, agent configuration, and related scripts. It reports where a workflow can fail across **Windows, macOS, and Linux**, including the shell and runtime context—not just the operating system.
+
+Skill validators check structure and linters check style; agent-xplat checks the OS × Shell × Runtime assumptions that make an otherwise valid workflow fail on another platform.
+
+Fastest install from the published v1.0.0 release:
+
+```bash
+python -m pip install https://github.com/kwhi6693-web/agent-xplat/releases/download/v1.0.0/agent_xplat-1.0.0-py3-none-any.whl
+agent-xplat scan .
+```
 
 ```text
 agent-xplat scan .
@@ -61,7 +78,7 @@ python -m agent_xplat scan . --format json
 
 ## Installation
 
-Python 3.10 or newer is required. The runtime package includes the small Tree-sitter parser bindings needed for JavaScript/JSX/TypeScript/TSX AST analysis; `pytest` is only a development extra. `pipx install .` is a convenient isolated CLI installation when working from a release checkout.
+Python 3.10 or newer is required. The v1.0.0 GitHub Release publishes a wheel and source distribution; the direct wheel URL is shown above. The runtime package includes the small Tree-sitter parser bindings needed for JavaScript/JSX/TypeScript/TSX AST analysis; `pytest` is only a development extra. `pipx install .` is a convenient isolated CLI installation when working from a release checkout.
 
 ## Supported environments
 
