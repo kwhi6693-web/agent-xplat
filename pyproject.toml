@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-xplat"
-version = "1.0.0"
+version = "1.0.1"
 description = "Detect cross-OS portability issues in AI agent workflows, skills, configs, and scripts."
 readme = "README.md"
 requires-python = ">=3.10"

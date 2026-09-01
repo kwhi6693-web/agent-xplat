@@ -175,7 +175,7 @@ class ScanResult:
     baseline: dict[str, Any] = field(default_factory=dict)
     verification: dict[str, Any] = field(default_factory=lambda: {"status": "INFERRED", "evidence": []})
     scan_timestamp: str = ""
-    tool_version: str = "1.0.0"
+    tool_version: str = "1.0.1"
 
     @property
     def active_findings(self) -> list[Finding]:

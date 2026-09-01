@@ -83,3 +83,34 @@ The GitHub Actions artifact API returned three non-expired artifacts, each bound
 | `agent-xplat-ubuntu-latest` | JSON, SARIF, Markdown, runtime evidence | All files non-empty; project JSON/SARIF validators passed; runtime status `VERIFIED`, `verified_os: [linux]` |
 
 The downloaded file hashes were recorded in the release evidence outside source control. The public workflow file and README blob hashes also matched the local commit readback. The generated verified badge was accepted only after all three OS evidence files were combined and validated; the SVG readback contained `Cross-OS Verified` and the three OS labels.
+
+## v1.0.1 release-trigger preflight
+
+Run ID: `VX-2026-09-02-001`
+Project: `agent-xplat` v1.0.1
+Execution scope: release-only version metadata, necessary release documentation, local Windows verification, isolated wheel/sdist installation, package integrity, `twine check`, security audit, and remote release preflight.
+
+| Check | Result |
+|---|---|
+| Scoped diff | PASS — only `pyproject.toml`, runtime version identifiers, version-only test expectations, `README.md`, `CHANGELOG.md`, and the two release audit records changed; core behavior and `.github/workflows/publish-pypi.yml` were not modified |
+| `python -m pytest -q` | PASS — 88 passed |
+| `python -m compileall -q src` | PASS |
+| CLI help/version probes | PASS — root plus ten subcommands; version `1.0.1` |
+| Self-scan | PASS — eight target rows, `100/100`, zero portability findings |
+| Controlled runtime verification | VERIFIED — Windows/PowerShell host; project test command exited 0 with 88 passed |
+| Build | PASS — `agent_xplat-1.0.1-py3-none-any.whl` and `agent_xplat-1.0.1.tar.gz` |
+| `twine check` | PASS — wheel and sdist |
+| Archive readback | PASS — final wheel 70,951 bytes / SHA-256 `020b95956997541693f33eaf99bd8f0a35c11d3f003ad0d3761e321cbf4a046c`; final sdist 72,877 bytes / SHA-256 `20f63e8f6d48c63d857477c6a64dac898539ee4c45f2ab8374f85620d9fa6ddf`; metadata version `1.0.1`; console entry point present |
+| Isolated wheel/sdist smoke | PASS — both installed and reported `1.0.1`; both clean self-scans passed |
+| Determinism and CLI chain | PASS — normalized repeated JSON scans identical; fresh init through badge chain passed |
+| Security audit | PASS — `pip-audit . --strict` and the toolchain audit reported no known vulnerabilities; repository security/release-route audit passed |
+| Remote preflight | PASS — baseline `de8faab` matched `origin/master`; no remote `v1.0.1` tag/release; publish workflow active; `pypi` environment present without protection rules |
+
+Evidence classification:
+
+- E1 — focused diff and release/workflow/security-route inspection: PASS.
+- E2 — full tests, compile, build, `twine check`, deterministic JSON, security audit, and CLI-chain checks: PASS.
+- E3 — installed wheel/sdist behavior and archive metadata readback: PASS; local runtime is verified only for Windows/PowerShell.
+- E4 — the external `v1.0.1` Release event and PyPI workflow outcome were not yet run when this preflight was recorded.
+
+The release gate remains open until the commit/tag/release and the triggered PyPI workflow are independently read back. Any manual approval request or workflow failure is a terminal stop under the current task.

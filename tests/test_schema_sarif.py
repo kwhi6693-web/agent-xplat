@@ -41,7 +41,7 @@ def test_result_validator_reports_missing_required_keys():
 def test_result_and_sarif_validators_reject_malformed_finding_shapes():
     document = {
         "schema_version": "1.0",
-        "tool_version": "1.0.0",
+        "tool_version": "1.0.1",
         "scan_timestamp": "now",
         "targets": [],
         "scores": [],
@@ -61,7 +61,7 @@ def test_result_and_sarif_validators_reject_malformed_finding_shapes():
 def test_result_validator_checks_nested_contract_types_and_ranges():
     document = {
         "schema_version": "1.0",
-        "tool_version": "1.0.0",
+        "tool_version": "1.0.1",
         "scan_timestamp": "now",
         "targets": [{"id": 1, "os": "windows", "shell": "powershell", "runtime": "native", "display_name": "x"}],
         "scores": [{"target": "windows-powershell", "score": 101, "status": "UNKNOWN"}],
@@ -81,7 +81,7 @@ def test_sarif_validator_checks_location_shape_and_region_coordinates():
     document = {
         "version": "2.1.0",
         "runs": [{
-            "tool": {"driver": {"name": "agent-xplat", "semanticVersion": "1.0.0"}},
+            "tool": {"driver": {"name": "agent-xplat", "semanticVersion": "1.0.1"}},
             "results": [{
                 "ruleId": "AX-TEST",
                 "level": "error",

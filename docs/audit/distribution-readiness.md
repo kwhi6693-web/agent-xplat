@@ -70,3 +70,27 @@ The GitHub repository environment named `pypi` should be created with manual app
 ## Limitations
 
 Trusted Publishing cannot be proven by local execution because it requires the PyPI-side publisher registration and a real GitHub Release event. The workflow is intentionally prepared for a future formal release/tag and will reject non-`v*`, prerelease, and tag/version-mismatch releases before publication.
+
+## v1.0.1 first publish-trigger preflight
+
+Date: 2026-09-02
+Scope: release-only version metadata, necessary release documentation, local package validation, and the first formal GitHub Release trigger. Core analyzer behavior and the existing `v1.0.0` tag/release remain unchanged.
+
+| Check | Result |
+|---|---|
+| Distribution/runtime version | PASS — `1.0.1` in package metadata and CLI/runtime identifiers |
+| Full regression | PASS — `88 passed` with `python -m pytest -q` |
+| Source compilation | PASS — `python -m compileall -q src` |
+| CLI contract | PASS — root help, all ten subcommand help probes, `--version` reports `1.0.1` |
+| Self-scan and runtime check | PASS — 8 target rows at `100/100`, 0 findings; Windows/PowerShell runtime check verified the project test command |
+| Build | PASS — wheel and source distribution created with expected `1.0.1` filenames |
+| `twine check` | PASS — both distributions passed |
+| Archive metadata and integrity | PASS — final wheel 70,951 bytes, SHA-256 `020b95956997541693f33eaf99bd8f0a35c11d3f003ad0d3761e321cbf4a046c`; final sdist 72,877 bytes, SHA-256 `20f63e8f6d48c63d857477c6a64dac898539ee4c45f2ab8374f85620d9fa6ddf` |
+| Fresh wheel installation | PASS — installed version `1.0.1`, CLI version and clean self-scan verified |
+| Fresh sdist installation | PASS — installed version `1.0.1`, CLI version and clean self-scan verified |
+| Determinism | PASS — two normalized JSON scans were identical |
+| Fresh CLI chain | PASS — init, init-ci, scan, report, baseline, baseline-only scan, fix dry-run, doctor, and badge |
+| Security audit | PASS — project dependency and toolchain `pip-audit` checks reported no known vulnerabilities; repository credential/path/artifact audit passed |
+| Remote preflight | PASS — `origin/master` matched the clean `de8faab` baseline; `v1.0.1` tag/release did not exist; publish workflow was active; GitHub `pypi` environment existed with no protection rule requiring approval |
+
+This section records local eligibility only. The commit push, formal `v1.0.1` Release, PyPI workflow result, and PyPI package readback are external post-release checks and must be recorded separately from this preflight.

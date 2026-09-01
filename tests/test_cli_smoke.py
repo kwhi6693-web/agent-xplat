@@ -3,7 +3,7 @@ from agent_xplat.cli import main
 
 
 def test_package_exposes_version():
-    assert __version__ == "1.0.0"
+    assert __version__ == "1.0.1"
 
 
 def test_cli_help_returns_zero(capsys):

@@ -2,6 +2,13 @@
 
 All notable changes to agent-xplat are documented here.
 
+## [1.0.1] - 2026-09-02
+
+### Changed
+
+- Updated the distribution and runtime version identifiers for the first PyPI Trusted Publishing release trigger.
+- No core analyzer functionality or portability rules changed.
+
 ## [1.0.0] - 2026-09-01
 
 ### Added

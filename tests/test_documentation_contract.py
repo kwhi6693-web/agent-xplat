@@ -14,7 +14,7 @@ def test_documented_rule_catalog_covers_registry():
 
 
 def test_public_metadata_and_ci_contract_are_present():
-    assert __version__ == "1.0.0"
+    assert __version__ == "1.0.1"
     assert (ROOT / "LICENSE").exists()
     workflow = (ROOT / ".github" / "workflows" / "agent-xplat.yml").read_text(encoding="utf-8")
     for runner in ("windows-latest", "macos-latest", "ubuntu-latest"):
