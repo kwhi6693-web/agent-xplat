@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-NODE-001", "AX-NODE-002", "AX-NODE-004"], "affected_contains": {"AX-NODE-001": "windows-powershell", "AX-NODE-002": "windows-cmd", "AX-NODE-004": "linux-bash"}, "severity": {"AX-NODE-001": "ERROR", "AX-NODE-002": "ERROR", "AX-NODE-004": "WARNING"}, "confidence": {"AX-NODE-001": "HIGH", "AX-NODE-002": "HIGH", "AX-NODE-004": "MEDIUM"}}

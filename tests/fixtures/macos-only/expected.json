@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-PATH-001", "AX-PM-001"], "affected_contains": {"AX-PATH-001": "windows-powershell", "AX-PM-001": "linux-bash"}, "severity": {"AX-PM-001": "ERROR"}, "confidence": {"AX-PM-001": "HIGH"}}

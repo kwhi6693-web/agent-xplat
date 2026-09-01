@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-SHELL-004", "AX-QUOTE-004"], "affected_contains": {"AX-SHELL-004": "linux-bash", "AX-QUOTE-004": "windows-cmd"}, "severity": {"AX-SHELL-004": "ERROR", "AX-QUOTE-004": "ERROR"}, "confidence": {"AX-SHELL-004": "HIGH", "AX-QUOTE-004": "HIGH"}}

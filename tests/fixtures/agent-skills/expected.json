@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-AGENT-001", "AX-SHELL-001"], "affected_contains": {"AX-AGENT-001": "windows-powershell", "AX-SHELL-001": "windows-cmd"}, "severity": {"AX-AGENT-001": "WARNING", "AX-SHELL-001": "BLOCKER"}, "confidence": {"AX-AGENT-001": "HIGH", "AX-SHELL-001": "HIGH"}}

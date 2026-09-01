@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-PATH-002", "AX-PM-001"], "affected_contains": {"AX-PATH-002": "linux-bash", "AX-PM-001": "macos-zsh"}, "severity": {"AX-PATH-002": "ERROR", "AX-PM-001": "ERROR"}, "confidence": {"AX-PATH-002": "HIGH", "AX-PM-001": "HIGH"}}

@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-SHELL-003", "AX-SHELL-006"], "affected_contains": {"AX-SHELL-003": "windows-cmd", "AX-SHELL-006": "windows-powershell"}, "severity": {"AX-SHELL-003": "ERROR", "AX-SHELL-006": "ERROR"}, "confidence": {"AX-SHELL-003": "HIGH", "AX-SHELL-006": "HIGH"}}

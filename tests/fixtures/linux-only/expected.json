@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-PATH-001", "AX-PM-001"], "affected_contains": {"AX-PATH-001": "windows-cmd", "AX-PM-001": "macos-zsh"}, "severity": {"AX-PM-001": "ERROR"}, "confidence": {"AX-PM-001": "HIGH"}}

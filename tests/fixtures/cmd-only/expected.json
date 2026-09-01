@@ -1,0 +1,1 @@
+{"expected_rules": ["AX-SHELL-008", "AX-SHELL-009", "AX-SHELL-005"], "affected_contains": {"AX-SHELL-008": "linux-bash", "AX-SHELL-009": "macos-zsh", "AX-SHELL-005": "linux-bash"}, "severity": {"AX-SHELL-008": "ERROR", "AX-SHELL-009": "ERROR", "AX-SHELL-005": "ERROR"}, "confidence": {"AX-SHELL-008": "HIGH", "AX-SHELL-009": "HIGH", "AX-SHELL-005": "HIGH"}}

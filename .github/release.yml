@@ -1,0 +1,10 @@
+changelog:
+  categories:
+    - title: Portability rules
+      labels: [portability, rule]
+    - title: CLI and reports
+      labels: [cli, reporting]
+    - title: Verification and CI
+      labels: [ci, verification]
+    - title: Other changes
+      labels: ["*"]

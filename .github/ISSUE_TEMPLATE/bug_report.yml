@@ -1,0 +1,24 @@
+name: Portability bug
+description: Report an incorrect or missing cross-OS portability finding.
+title: "[bug] "
+labels: [bug, portability]
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include a small source snippet or fixture and the command used.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: agent-xplat version
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual result
+    validations:
+      required: true

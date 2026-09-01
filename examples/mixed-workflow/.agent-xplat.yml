@@ -1,0 +1,16 @@
+targets:
+  - windows-powershell
+  - windows-git-bash
+  - windows-wsl
+  - macos-zsh
+  - linux-bash
+supported:
+  - windows-powershell
+  - windows-git-bash
+  - windows-wsl
+  - macos-zsh
+  - linux-bash
+minimum_score: 85
+fail_on:
+  - BLOCKER
+  - ERROR

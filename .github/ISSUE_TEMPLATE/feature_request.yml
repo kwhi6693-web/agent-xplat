@@ -1,0 +1,19 @@
+name: Portability rule request
+description: Propose a focused cross-OS portability rule or report improvement.
+title: "[rule] "
+labels: [enhancement, portability]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Portability problem
+      description: Which OS, shell, runtime, and stable failure should be detected?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and examples
+      description: Provide positive/negative examples and the expected severity/confidence.
+    validations:
+      required: true

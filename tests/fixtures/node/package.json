@@ -1,0 +1,1 @@
+{"scripts":{"build":"NODE_ENV=production node build.js && rm -rf dist"},"dependencies":{"better-sqlite3":"^9"}}

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+agent-xplat-report.md
+agent-xplat.json
+agent-xplat.sarif
+agent-xplat-scan.json
+agent-xplat-verification.json
+agent-xplat-badge.svg

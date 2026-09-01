@@ -1,0 +1,25 @@
+# The project source intentionally contains detector implementation examples.
+# Keep the self-scan focused on user-facing metadata and packaging files.
+targets:
+  - windows-powershell
+  - windows-cmd
+  - windows-git-bash
+  - windows-wsl
+  - macos-zsh
+  - macos-bash
+  - linux-bash
+  - linux-zsh
+exclude:
+  - src/**
+  - tests/**
+  - docs/**
+  - examples/**
+  - README.md
+  - .github/**
+  - AGENTS.md
+  - pyproject.toml
+  - .agent-xplat.yml
+minimum_score: 85
+fail_on:
+  - BLOCKER
+  - ERROR
