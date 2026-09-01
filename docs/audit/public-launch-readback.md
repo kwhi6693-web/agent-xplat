@@ -1,7 +1,7 @@
 # Public Launch Readback
 
-Readback date: 2026-09-01 (Asia/Shanghai)  
-Repository: https://github.com/kwhi6693-web/agent-xplat  
+Readback date: 2026-09-01 (Asia/Shanghai)<br>
+Repository: https://github.com/kwhi6693-web/agent-xplat<br>
 Authorized scope: publish the frozen `agent-xplat` v1.0.0 project, configure public repository metadata, publish the GitHub Release and downloadable package assets, and independently verify the public destination.
 
 ## Release identity
