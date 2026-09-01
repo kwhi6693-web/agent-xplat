@@ -51,6 +51,33 @@ def test_config_loader_accepts_optional_agent_xplat_wrapper_and_validates_verifi
     assert config.verification["timeout"] == 30
 
 
+def test_config_loader_rejects_contract_targets_outside_scan_targets(tmp_path: Path):
+    (tmp_path / ".agent-xplat.yml").write_text(
+        "targets:\n  - linux-bash\nsupported:\n  - windows-powershell\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ConfigError, match="included in targets"):
+        load_config(tmp_path)
+
+
+def test_config_loader_rejects_root_wrapper_key_collision(tmp_path: Path):
+    (tmp_path / ".agent-xplat.yml").write_text(
+        "minimum_score: 80\nagent-xplat:\n  minimum_score: 90\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ConfigError, match="duplicated between root and agent-xplat"):
+        load_config(tmp_path)
+
+
+def test_config_loader_rejects_unknown_ignore_rule_and_duplicate_key(tmp_path: Path):
+    (tmp_path / ".agent-xplat.yml").write_text("ignore:\n  - AX-NOT-REGISTERED\n", encoding="utf-8")
+    with pytest.raises(ConfigError, match="unknown ignore rule"):
+        load_config(tmp_path)
+    (tmp_path / ".agent-xplat.yml").write_text("minimum_score: 80\nminimum_score: 90\n", encoding="utf-8")
+    with pytest.raises(ConfigError, match="duplicate configuration key"):
+        load_config(tmp_path)
+
+
 def test_discovery_is_deterministic_bounded_and_excludes_generated_dirs(tmp_path: Path):
     (tmp_path / "SKILL.md").write_text("# Skill\n", encoding="utf-8")
     (tmp_path / ".github").mkdir()
@@ -63,3 +90,10 @@ def test_discovery_is_deterministic_bounded_and_excludes_generated_dirs(tmp_path
     assert [item.relative_path for item in first] == [item.relative_path for item in second]
     assert [item.relative_path for item in first] == [".github/copilot-instructions.md", "SKILL.md"]
     assert all(isinstance(item, SourceFile) for item in first)
+
+
+def test_discovery_includes_javascript_and_typescript_dialect_extensions(tmp_path: Path):
+    for name in ("view.jsx", "module.mts", "module.cts", "view.tsx"):
+        (tmp_path / name).write_text("export const value = 1;\n", encoding="utf-8")
+    discovered = {item.relative_path for item in discover_files(tmp_path, load_config(tmp_path))}
+    assert {"view.jsx", "module.mts", "module.cts", "view.tsx"}.issubset(discovered)

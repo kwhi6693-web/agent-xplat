@@ -29,7 +29,7 @@ def scan(root: Path, config: Config | None = None) -> ScanResult:
     # content rules so ignored/generated directories do not affect analysis.
     findings.extend(_metadata_findings(root, targets, config))
     findings.sort(key=lambda finding: (finding.location.path, finding.location.line, finding.location.column, finding.rule_id, finding.fingerprint))
-    apply_suppressions(findings, {source.relative_path: source for source in sources}, config)
+    findings, suppression_diagnostics = apply_suppressions(findings, {source.relative_path: source for source in sources}, config)
     scores = score_findings(findings, targets, config.minimum_score)
     contract = evaluate_contract(config, scores, findings)
     summary = {
@@ -41,6 +41,7 @@ def scan(root: Path, config: Config | None = None) -> ScanResult:
         "warnings": len([finding for finding in findings if not finding.ignored and finding.severity.value == "WARNING"]),
         "infos": len([finding for finding in findings if not finding.ignored and finding.severity.value == "INFO"]),
         "contract_violations": len(contract.get("violations", [])),
+        "suppression_diagnostics": suppression_diagnostics,
     }
     return ScanResult(
         # Reports must be portable and must not leak the scanner's machine path.

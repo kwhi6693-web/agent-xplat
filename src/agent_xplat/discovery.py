@@ -39,7 +39,11 @@ INCLUDE_SUFFIXES = {
     ".js",
     ".mjs",
     ".cjs",
+    ".jsx",
     ".ts",
+    ".mts",
+    ".cts",
+    ".tsx",
 }
 
 

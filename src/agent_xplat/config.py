@@ -183,6 +183,8 @@ def parse_yaml_subset(text: str) -> dict[str, Any]:
         key, raw_value = _split_key(content)
         if not key:
             raise ConfigError(f"line {number}: empty mapping key")
+        if isinstance(parent, dict) and key in parent:
+            raise ConfigError(f"line {number}: duplicate configuration key: {key}")
         if not raw_value:
             next_entry = entries[position + 1] if position + 1 < len(entries) else None
             container: Any = [] if next_entry and next_entry[0] > indent and next_entry[1].startswith("-") else {}
@@ -215,6 +217,9 @@ def _normalize_document(document: dict[str, Any]) -> dict[str, Any]:
     if wrapped is not None:
         if not isinstance(wrapped, dict):
             raise ConfigError("agent-xplat must contain a mapping")
+        overlap = sorted((set(document) - {"agent-xplat"}) & set(wrapped))
+        if overlap:
+            raise ConfigError(f"configuration key duplicated between root and agent-xplat: {', '.join(overlap)}")
         document = {**{key: value for key, value in document.items() if key != "agent-xplat"}, **wrapped}
     unknown = sorted(set(document) - _KNOWN_KEYS)
     if unknown:
@@ -241,9 +246,17 @@ def load_config(root: Path) -> Config:
     _validate_target_list(unsupported, "unsupported")
     if set(supported) & set(unsupported):
         raise ConfigError("a target cannot be both supported and unsupported")
+    outside_scan = (set(supported) | set(unsupported)) - set(targets)
+    if outside_scan:
+        raise ConfigError(f"contract target(s) must be included in targets: {', '.join(sorted(outside_scan))}")
     for rule_id in ignore:
         if not re.fullmatch(r"AX-[A-Z0-9-]+", rule_id):
             raise ConfigError(f"invalid ignore rule id: {rule_id}")
+    from .rules.registry import get_rule
+
+    unknown_rules = sorted(rule_id for rule_id in ignore if get_rule(rule_id.upper()) is None)
+    if unknown_rules:
+        raise ConfigError(f"unknown ignore rule id(s): {', '.join(unknown_rules)}")
     minimum_score = document.get("minimum_score", 85)
     if not isinstance(minimum_score, int) or not 0 <= minimum_score <= 100:
         raise ConfigError("minimum_score must be an integer from 0 to 100")

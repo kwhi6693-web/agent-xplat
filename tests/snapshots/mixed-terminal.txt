@@ -1,0 +1,61 @@
+Agent Workflow Portability
+===========================
+
+Compatibility Matrix
+---------------------
+Environment                Score Status    Findings
+Windows / PowerShell      41/100 BLOCKED          4
+Windows / CMD              1/100 BLOCKED          6
+Windows / Git Bash        76/100 PARTIAL          3
+Windows / WSL             76/100 PARTIAL          3
+macOS / zsh               56/100 PARTIAL          4
+macOS / bash              56/100 PARTIAL          4
+Linux / bash              56/100 PARTIAL          4
+Linux / zsh               56/100 PARTIAL          4
+
+7 portability issues found (0 ignored)
+
+Findings
+--------
+SKILL.md:3:6 AX-SHELL-001 [BLOCKER/HIGH]
+  Run `chmod +x scripts/run.sh` and then `C:\\Temp\\output.txt`.
+       ^^^^^
+  Affected: windows-powershell, windows-cmd
+  Reason: POSIX executable-bit command is unavailable in native Windows shells.
+  Suggested remediation: Use a portable launcher or avoid executable-bit requirements.
+SKILL.md:3:41 AX-PATH-002 [ERROR/HIGH]
+  Run `chmod +x scripts/run.sh` and then `C:\\Temp\\output.txt`.
+                                          ^^^^^^^^^^^^^^^^^^^^
+  Affected: macos-zsh, macos-bash, linux-bash, linux-zsh
+  Reason: Windows-specific path C:\\Temp\\output.txt assumes a drive letter or Windows separator.
+  Suggested remediation: Use a path API and resolve platform directories at runtime.
+SKILL.md:4:21 AX-QUOTE-004 [ERROR/HIGH]
+  For PowerShell set `$env:MODE=fast`; for Bash use `MODE=fast node build.js`.
+                      ^^^^
+  Affected: windows-cmd
+  Reason: Dollar-variable interpolation is not supported by CMD.
+  Suggested remediation: Use a shell-neutral environment API or a target-specific launcher.
+SKILL.md:4:21 AX-SHELL-004 [ERROR/HIGH]
+  For PowerShell set `$env:MODE=fast`; for Bash use `MODE=fast node build.js`.
+                      ^^^^^^^^^
+  Affected: windows-cmd, windows-git-bash, windows-wsl, macos-zsh, macos-bash, linux-bash, linux-zsh
+  Reason: PowerShell environment-variable syntax is not interpreted by Bash, zsh, or CMD.
+  Suggested remediation: Use a shell-neutral environment API or a target-specific branch.
+SKILL.md:4:26 AX-SHELL-003 [ERROR/HIGH]
+  For PowerShell set `$env:MODE=fast`; for Bash use `MODE=fast node build.js`.
+                           ^^^^
+  Affected: windows-powershell, windows-cmd
+  Reason: POSIX temporary environment assignment before a command is not accepted by native Windows shells.
+  Suggested remediation: Use a cross-shell launcher or set the environment through the host runtime.
+SKILL.md:4:36 AX-SHELL-010 [INFO/LOW]
+  For PowerShell set `$env:MODE=fast`; for Bash use `MODE=fast node build.js`.
+                                     ^
+  Affected: windows-powershell, windows-cmd, windows-git-bash, windows-wsl, macos-zsh, macos-bash, linux-bash, linux-zsh
+  Reason: Semicolon command chaining has shell-specific parsing and error-propagation semantics.
+  Suggested remediation: Use separate commands with explicit error handling where portability matters.
+SKILL.md:4:62 AX-RUNTIME-001 [INFO/LOW]
+  For PowerShell set `$env:MODE=fast`; for Bash use `MODE=fast node build.js`.
+                                                               ^^^^
+  Affected: windows-powershell, windows-cmd, windows-git-bash, windows-wsl, macos-zsh, macos-bash, linux-bash, linux-zsh
+  Reason: Runtime command node is assumed to be available without a declared version or capability check.
+  Suggested remediation: Declare supported Python/Node versions and check the runtime.

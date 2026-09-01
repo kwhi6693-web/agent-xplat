@@ -45,9 +45,13 @@ All rules are registered in `src/agent_xplat/rules/registry.py`. Each rule has a
 | AX-NODE-002 | node | ERROR | HIGH | POSIX utility in package script |
 | AX-NODE-003 | node | WARNING | MEDIUM | `.sh` or `.bin` executable path |
 | AX-NODE-004 | node | WARNING | MEDIUM | Native Node dependency/build toolchain |
+| AX-NODE-005 | node | ERROR | HIGH | OS-specific command or shell parsing in a bound `child_process` call |
+| AX-NODE-006 | node | WARNING | MEDIUM | `process.env` read without a visible fallback |
+| AX-NODE-007 | node | WARNING | MEDIUM | `process.platform` branch without a complete alternate path |
+| AX-NODE-008 | node | ERROR | HIGH | Hardcoded Node executable, absolute path, or separator in a bound child-process call |
 | AX-PM-001 | package managers | ERROR | HIGH | OS-specific package manager |
 | AX-TOOL-001 | external tools | WARNING | MEDIUM | External executable assumed on PATH |
 | AX-RUNTIME-001 | runtimes | INFO | LOW | Runtime command without version/capability declaration |
 | AX-AGENT-001 | agent config | WARNING | HIGH | Agent file names one shell without fallback |
 
-Use `agent-xplat explain AX-SHELL-001` for the full meaning, why it matters, examples, remediation, and severity/confidence rationale.
+JavaScript-family source (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`) is parsed with Tree-sitter. Child-process findings require a structurally recognized `child_process` import/require binding. A complete `process.platform` fallback such as an `if/else` or ternary is not reported as an unbalanced branch. Use `agent-xplat explain AX-SHELL-001` or `agent-xplat explain AX-NODE-005` for the full meaning, why it matters, examples, remediation, and severity/confidence rationale.

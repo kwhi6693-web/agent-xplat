@@ -15,7 +15,7 @@ OS × Shell × Runtime target matrix
         v
 bounded deterministic discovery
         |
-        +--> Python AST / JSON / text parsers
+        +--> Python AST / Tree-sitter JS-TS AST / JSON / text parsers
         |
         v
 modular AX-* rules
@@ -40,8 +40,9 @@ terminal | JSON 1.0 | SARIF 2.1.0 | Markdown | fix/test artifacts
 | `environments.py` | The eight first-class OS × Shell × Runtime target identities |
 | `config.py` | Documented YAML subset parser, defaults, and schema validation |
 | `discovery.py` | Deterministic include/exclude traversal, binary and size bounds |
-| `parsers.py` | Python AST and JSON parsing without code execution |
+| `parsers.py` | Python AST, Tree-sitter JavaScript-family AST, and JSON parsing without code execution |
 | `rules/` | Focused detectors and rule metadata registry |
+| `rules/node_ast.py` | Binding-aware Node child-process, platform, environment, executable, and path facts |
 | `engine.py` | Scan orchestration and repository metadata checks |
 | `suppression.py` | Global and line-level suppression with audit state |
 | `scoring.py` | Repeatable target-specific score penalties and status mapping |
@@ -63,7 +64,7 @@ Every finding has a stable rule ID, title, description, relative source path, on
 
 ## Static safety boundary
 
-Discovery reads bytes and metadata. Python analysis uses `ast.parse`, not `import`. JSON is parsed as data. Shell snippets are inspected lexically. No scan path invokes a target script, package manager, subprocess, shell, or network. The separate `test` command is the explicit runtime boundary and only runs a no-shell-operator allowlisted command with a timeout.
+Discovery reads bytes and metadata. Python analysis uses `ast.parse`, JavaScript-family analysis uses Tree-sitter, and neither path imports or evaluates target code. JSON is parsed as data. Shell snippets are inspected lexically except for Node command strings, which are inspected only when a Tree-sitter AST binds them to `child_process`. No scan path invokes a target script, package manager, subprocess, shell, or network. The separate `test` command is the explicit runtime boundary and only runs a no-shell-operator allowlisted command with a timeout.
 
 ## Scoring
 

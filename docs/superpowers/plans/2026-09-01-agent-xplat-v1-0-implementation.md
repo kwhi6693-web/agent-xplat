@@ -4,9 +4,9 @@
 
 **Goal:** Build a deterministic, read-only-by-default Python CLI that identifies cross-OS assumptions in AI-agent workflows, skills, agent configuration, and related scripts, then reports, safely fixes, baselines, and distinguishes inferred portability from real runner verification.
 
-**Architecture:** A small standard-library-first Python package separates immutable domain models, target discovery, structured Python/JSON parsing, text/shell rules, scoring, contract evaluation, reporting, fixing, and controlled verification. The environment model is `OS × Shell × Runtime`; each finding carries affected target IDs, severity, confidence, source location, suppression state, and deterministic fingerprints. CLI commands orchestrate one scan result schema used by terminal, JSON, SARIF, Markdown, baseline, diff, CI, and agent callers.
+**Architecture:** A small standard-library-first Python package separates immutable domain models, target discovery, structured Python/JSON parsing, Tree-sitter JavaScript-family parsing, text/shell rules, scoring, contract evaluation, reporting, fixing, and controlled verification. The environment model is `OS × Shell × Runtime`; each finding carries affected target IDs, severity, confidence, source location, suppression state, and deterministic fingerprints. CLI commands orchestrate one scan result schema used by terminal, JSON, SARIF, Markdown, baseline, diff, CI, and agent callers.
 
-**Tech Stack:** Python 3.10+ (tested on Python 3.12), `argparse`, `ast`, `json`, `pathlib`, `tomllib`-compatible standard library modules, and a dependency-free YAML subset parser/validator for the documented configuration schema. `pytest` is a development-only test dependency. GitHub Actions supplies the real Windows/macOS/Linux verification matrix.
+**Tech Stack:** Python 3.10+ (tested on Python 3.12), `argparse`, `ast`, `json`, `pathlib`, `tomllib`-compatible standard library modules, a dependency-free YAML subset parser/validator for the documented configuration schema, and narrowly scoped Tree-sitter JavaScript/TypeScript grammar bindings for source AST analysis. `pytest` is a development-only test dependency. GitHub Actions supplies the real Windows/macOS/Linux verification matrix.
 
 **Spec:** The active task contract is `docs/task-specification.md`; the user-provided Agent Xplat v1.0 implementation prompt is the governing product specification.
 
@@ -69,7 +69,7 @@
 - Findings have deterministic fingerprints and never silently disappear when ignored.
 
 - [x] Write positive/negative fixture tests for path, shell, environment syntax, Python, Node, filesystem, package-manager, external-tool, and agent-file assumptions.
-- [x] Implement structured parsing for Python imports/AST and package.json scripts; use narrowly scoped lexical detectors for shell/text.
+- [x] Implement structured parsing for Python imports/AST, package.json scripts, and JavaScript-family source AST; use narrowly scoped lexical detectors for shell/text.
 - [x] Add per-target impact mapping, severity, confidence, remediation, examples, and line/column anchors.
 - [x] Run rule slices and verify no fixture uses a hard-coded expected score.
 
@@ -145,6 +145,6 @@
 ## Plan self-review
 
 - Requirements map to Tasks 2–7: environment model, scanning, rules, scores, config/ignore, baseline/diff, explain, fix, runtime verification, CI, SARIF/JSON/Markdown, badge/doctor/init, fixtures, docs, and metadata.
-- The plan avoids third-party runtime dependencies and does not claim local evidence for unavailable operating systems.
+- The plan keeps runtime dependencies limited to parser bindings and does not claim local evidence for unavailable operating systems.
 - All production interfaces referenced by later tasks are defined in earlier task contracts.
-- The only known release evidence gap before a remote repository run is real GitHub-hosted Windows/macOS/Linux CI execution.
+- The only known release evidence gap after local implementation hardening is real GitHub-hosted Windows/macOS/Linux CI execution; it must be re-read from an actual workflow run.

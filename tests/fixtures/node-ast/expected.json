@@ -1,0 +1,23 @@
+{
+  "expected_rules": ["AX-NODE-005", "AX-NODE-006", "AX-NODE-007", "AX-NODE-008"],
+  "exact_rules": ["AX-NODE-005", "AX-NODE-006", "AX-NODE-007", "AX-NODE-008"],
+  "affected_contains": {
+    "AX-NODE-005": "windows-powershell",
+    "AX-NODE-006": "linux-bash",
+    "AX-NODE-007": "windows-cmd",
+    "AX-NODE-008": "linux-bash"
+  },
+  "severity": {
+    "AX-NODE-005": "ERROR",
+    "AX-NODE-006": "WARNING",
+    "AX-NODE-007": "WARNING",
+    "AX-NODE-008": "ERROR"
+  },
+  "confidence": {
+    "AX-NODE-005": "HIGH",
+    "AX-NODE-006": "MEDIUM",
+    "AX-NODE-007": "MEDIUM",
+    "AX-NODE-008": "HIGH"
+  },
+  "description": "Structured JavaScript/TypeScript AST cases, including a guarded fallback and TSX syntax."
+}

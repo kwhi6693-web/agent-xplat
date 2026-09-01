@@ -142,6 +142,10 @@ def render_markdown(result: ScanResult) -> str:
         "## Ignored Findings",
         "",
         f"- {result.summary.get('ignored_findings', 0)} ignored findings; ignored findings remain present in JSON with `ignored: true`.",
+        *[
+            f"- Suppression diagnostic: `{item.get('path')}:{item.get('line')}` `{item.get('rule_id')}` — {item.get('message')}."
+            for item in result.summary.get("suppression_diagnostics", [])
+        ],
         "",
         "## Baseline Status",
         "",
@@ -222,6 +226,12 @@ def render_terminal(result: ScanResult, color: bool = False) -> str:
         lines.append(f"  Suggested remediation: {finding.remediation}")
     if not result.active_findings:
         lines.append("  None")
+    if result.summary.get("suppression_diagnostics"):
+        lines.extend(["", "Suppression diagnostics", "-----------------------"])
+        lines.extend(
+            f"  {item.get('path')}:{item.get('line')} {item.get('rule_id')}: {item.get('message')}"
+            for item in result.summary["suppression_diagnostics"]
+        )
     if result.contract.get("violations"):
         lines.extend(["", "Contract violations", "--------------------"])
         lines.extend(f"  {item['target']}: {', '.join(item['detected_assumptions'])}" for item in result.contract["violations"])

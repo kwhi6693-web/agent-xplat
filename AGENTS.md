@@ -5,7 +5,7 @@ This repository implements the active task in `docs/task-specification.md`.
 ## Project facts
 
 - Purpose: Cross-OS runtime portability checker for AI agent workflows.
-- Stack: Python 3.10+, standard-library-first; pytest is development-only.
+- Stack: Python 3.10+, standard-library-first core with narrowly scoped Tree-sitter JavaScript/TypeScript parser bindings; pytest is development-only.
 - Source: `src/agent_xplat/`.
 - Tests: `tests/` and `tests/fixtures/`.
 - Documentation and decisions: `docs/`.
@@ -16,7 +16,7 @@ This repository implements the active task in `docs/task-specification.md`.
 | Operation | Command | Status |
 |---|---|---|
 | Install editable | `python -m pip install -e ".[dev]"` | Verified locally |
-| Tests | `python -m pytest -q` | Verified locally: 54 passed |
+| Tests | `python -m pytest -q` | Current count is recorded in `docs/audit/verification-run.md` |
 | Build | `python -m pip wheel . --no-deps --wheel-dir <external-build-dir>` | Verified locally: wheel `1.0.0` |
 | Static scan | `python -m agent_xplat scan .` | Verified locally: clean self-scan |
 | Runtime verification | `python -m agent_xplat test .` | Verified on current Windows/PowerShell host only; hosted matrix pending |

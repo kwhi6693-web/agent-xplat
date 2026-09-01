@@ -61,7 +61,7 @@ python -m agent_xplat scan . --format json
 
 ## Installation
 
-Python 3.10 or newer is required. The runtime package has no third-party dependencies. `pytest` is only a development extra. `pipx install .` is a convenient isolated CLI installation when working from a release checkout.
+Python 3.10 or newer is required. The runtime package includes the small Tree-sitter parser bindings needed for JavaScript/JSX/TypeScript/TSX AST analysis; `pytest` is only a development extra. `pipx install .` is a convenient isolated CLI installation when working from a release checkout.
 
 ## Supported environments
 
@@ -80,7 +80,7 @@ The internal model is OS × Shell × Runtime:
 
 ## What is scanned
 
-The default bounded discovery includes `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md`, `.github/**`, `.cursor/**`, `.claude/**`, `.codex/**`, `scripts/**`, package manifests/lockfiles, Python metadata, Docker/Make files, and common shell, Python, JavaScript, TypeScript, and batch extensions. `.git`, `node_modules`, `vendor`, `dist`, `build`, caches, binary files, and oversized files are excluded.
+The default bounded discovery includes `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md`, `.github/**`, `.cursor/**`, `.claude/**`, `.codex/**`, `scripts/**`, package manifests/lockfiles, Python metadata, Docker/Make files, and common shell, Python, JavaScript, JSX, TypeScript, TSX, and batch extensions (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`). `.git`, `node_modules`, `vendor`, `dist`, `build`, caches, binary files, and oversized files are excluded.
 
 ## Examples
 
@@ -90,13 +90,14 @@ Included fixtures exercise portable, OS-specific, shell-specific, Python, Node, 
 agent-xplat scan tests/fixtures/mixed
 agent-xplat scan tests/fixtures/python --format json
 agent-xplat scan tests/fixtures/node --format sarif --output agent-xplat.sarif
+agent-xplat scan tests/fixtures/node-ast --format json
 ```
 
 The fixture metadata in `tests/fixtures/*/expected.json` records expected rules, affected targets, severity, and confidence. It is test data, not a claim about a third-party tool's standard.
 
 ## Rules, severity, and confidence
 
-Rules are modular and use stable `AX-*` identifiers. They cover paths, shell commands and environment syntax, quoting, Python, Node, filesystems, package managers, external tools, runtime assumptions, and agent configuration. See [docs/RULES.md](docs/RULES.md).
+Rules are modular and use stable `AX-*` identifiers. They cover paths, shell commands and environment syntax, quoting, Python, Node package scripts and Node/JS/TS AST facts, filesystems, package managers, external tools, runtime assumptions, and agent configuration. JavaScript-family source is parsed structurally with Tree-sitter; dynamic strings and behavior still remain static inferences. See [docs/RULES.md](docs/RULES.md).
 
 Severity is one of `BLOCKER`, `ERROR`, `WARNING`, or `INFO`. Confidence is one of `HIGH`, `MEDIUM`, or `LOW`. A low-confidence assumption is reported as such and does not become a blocker merely because it is inconvenient.
 
@@ -185,6 +186,7 @@ chmod +x scripts/render.sh
 ```
 
 Ignored findings remain in machine-readable output with `ignored: true`, and the summary reports their count. Unknown keys, targets, severities, rule IDs, and invalid values fail with exit code 2.
+Unused line-level suppression markers are reported as suppression diagnostics instead of being silently accepted.
 
 ## Agent-native usage and exit codes
 
@@ -226,7 +228,7 @@ Config -> bounded discovery -> structured/text parsers -> rule registry
 
 ## Limitations and roadmap
 
-Static text cannot prove every shell version, installed tool, filesystem policy, native binary, or runtime behavior. Node source is analyzed through package JSON and focused lexical rules in v1.0; a full JavaScript AST is a future extension. The release workflow is generated and documented, but hosted runner evidence must come from the user's GitHub repository. Future work may add more runtime adapters and independently reviewed parser plugins without changing the public finding contract.
+Static analysis cannot prove every shell version, installed tool, filesystem policy, native binary, dynamic command string, or runtime behavior. JavaScript-family source now has structured AST coverage for the supported suffixes, but dynamic evaluation, generated code, unsupported syntax recovery, and actual subprocess behavior remain runtime concerns. The release workflow is generated and documented, but hosted runner evidence must come from the user's GitHub repository. Future work may add more runtime adapters and independently reviewed rules without changing the public finding contract.
 
 ## Contributing
 

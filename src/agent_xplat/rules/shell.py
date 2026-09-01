@@ -6,6 +6,7 @@ import re
 
 from ..environments import is_native_windows
 from ..models import Confidence, Severity, Finding, SourceFile
+from ..parsers import javascript_suffixes
 from .common import RuleContext, RuleSpec, line_matches, make_finding
 
 
@@ -46,6 +47,11 @@ def _native_windows(context: RuleContext) -> tuple[str, ...]:
 
 
 def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, RuleSpec]) -> list[Finding]:
+    # JavaScript-family source is analyzed by the binding-aware AST detector.
+    # Treating member names such as ``cp.exec("cp ...")`` as shell commands
+    # here would create a false positive outside an actual child-process call.
+    if source.path.suffix.lower() in javascript_suffixes():
+        return []
     findings: list[Finding] = []
     native_windows = _native_windows(context)
     for line_index, line, match in line_matches(source, r"\bchmod\s+(?:[+\-][rwxXst]+\s+)?[^\s`]+", re.IGNORECASE):

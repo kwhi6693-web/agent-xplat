@@ -6,6 +6,7 @@ import re
 
 from ..environments import is_native_windows
 from ..models import Confidence, Severity, Finding, SourceFile
+from ..parsers import javascript_suffixes
 from .common import RuleContext, RuleSpec, line_matches, make_finding
 
 
@@ -40,6 +41,11 @@ def _is_unquoted(line: str, position: int) -> bool:
 
 
 def detect_quoting(source: SourceFile, context: RuleContext, specs: dict[str, RuleSpec]) -> list[Finding]:
+    # JS/TS interpolation and strings are not shell source. Node-specific
+    # command strings are handled only when bound to child_process by the AST
+    # detector, which keeps ordinary application strings out of this rule.
+    if source.path.suffix.lower() in javascript_suffixes():
+        return []
     findings: list[Finding] = []
     native_windows = tuple(target.id for target in context.targets if is_native_windows(target.id))
     for line_index, line, match in line_matches(source, r"\$\{[A-Za-z_][A-Za-z0-9_]*\}"):

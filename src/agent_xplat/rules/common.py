@@ -53,6 +53,7 @@ def make_finding(
     reason: str,
     *,
     code: str | None = None,
+    column: int | None = None,
     severity: Severity | None = None,
     confidence: Confidence | None = None,
     metadata: dict | None = None,
@@ -64,7 +65,11 @@ def make_finding(
         rule_id=spec.rule_id,
         title=spec.title,
         description=spec.description,
-        location=source.location(line_index, needle),
+        location=(
+            source.location(line_index, needle)
+            if column is None
+            else SourceLocation(source.relative_path, line_index + 1, column, line_index + 1, column + len(needle))
+        ),
         severity=severity or spec.severity,
         confidence=confidence or spec.confidence,
         affected_targets=affected,

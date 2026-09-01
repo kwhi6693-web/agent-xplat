@@ -1,1 +1,1 @@
-{"expected_rules": [], "description": "A workflow described without OS-specific shell or path assumptions."}
+{"expected_rules": [], "exact_rules": [], "description": "A workflow described without OS-specific shell or path assumptions."}
