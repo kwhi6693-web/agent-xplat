@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">agent-xplat — Cross-OS portability for AI-agent workflows</title>
+  <desc id="desc">Public launch card showing the PyPI installation command and Windows, macOS, and Linux verification.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#172b3d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2ea44f"/>
+      <stop offset="1" stop-color="#46d369"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="1080" cy="72" r="210" fill="#2ea44f" opacity="0.10"/>
+  <circle cx="1140" cy="580" r="270" fill="#58a6ff" opacity="0.08"/>
+  <rect x="64" y="62" width="10" height="506" rx="5" fill="url(#accent)"/>
+  <text x="108" y="146" fill="#9be9a8" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700" letter-spacing="3">PUBLIC PYPI RELEASE</text>
+  <text x="108" y="238" fill="#ffffff" font-family="Segoe UI,Arial,sans-serif" font-size="78" font-weight="700">agent-xplat</text>
+  <text x="112" y="290" fill="#d7e3ee" font-family="Segoe UI,Arial,sans-serif" font-size="30">Find the OS assumptions that break</text>
+  <text x="112" y="330" fill="#d7e3ee" font-family="Segoe UI,Arial,sans-serif" font-size="30">AI-agent workflows.</text>
+  <g font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="600">
+    <rect x="112" y="374" width="176" height="44" rx="22" fill="#203a4b" stroke="#4c7081"/>
+    <text x="200" y="403" fill="#ffffff" text-anchor="middle">Windows &#10003;</text>
+    <rect x="304" y="374" width="170" height="44" rx="22" fill="#203a4b" stroke="#4c7081"/>
+    <text x="389" y="403" fill="#ffffff" text-anchor="middle">macOS &#10003;</text>
+    <rect x="490" y="374" width="160" height="44" rx="22" fill="#203a4b" stroke="#4c7081"/>
+    <text x="570" y="403" fill="#ffffff" text-anchor="middle">Linux &#10003;</text>
+  </g>
+  <rect x="112" y="466" width="790" height="104" rx="14" fill="#07101b" stroke="#335269"/>
+  <text x="142" y="510" fill="#9be9a8" font-family="Cascadia Code,Consolas,monospace" font-size="24">python -m pip install agent-xplat</text>
+  <text x="142" y="548" fill="#ffffff" font-family="Cascadia Code,Consolas,monospace" font-size="24">agent-xplat scan .</text>
+  <text x="1088" y="548" fill="#9fb4c4" font-family="Segoe UI,Arial,sans-serif" font-size="19" text-anchor="end">v1.0.1</text>
+</svg>
