@@ -59,11 +59,31 @@ Linux / zsh               56/100 PARTIAL          4
 
 The scores are deterministic and explainable. The included output is a mixed-platform fixture example, not a claim about every repository.
 
-## Installation
+## 📦 Installation
 
 Python 3.10 or newer is required. The package is published on PyPI as a wheel and source distribution. Use `python -m pip install agent-xplat` in an active virtual environment, or `pipx install agent-xplat` for an isolated CLI installation. The runtime package includes the small Tree-sitter parser bindings needed for JavaScript/JSX/TypeScript/TSX AST analysis; `pytest` is only a development extra. `pipx install .` remains a convenient isolated CLI installation when working from a source checkout.
 
-## Supported environments
+From a source checkout:
+
+```bash
+python -m pip install .
+agent-xplat scan .
+```
+
+For development:
+
+```bash
+python -m pip install -e ".[dev]"
+python -m pytest -q
+```
+
+The module invocation is always available as a fallback:
+
+```bash
+python -m agent_xplat scan . --format json
+```
+
+## 🔍 Supported environments
 
 The internal model is OS × Shell × Runtime:
 
@@ -78,11 +98,11 @@ The internal model is OS × Shell × Runtime:
 | `linux-bash` | Linux | Bash | native |
 | `linux-zsh` | Linux | zsh | native |
 
-## What is scanned
+## 📋 What is scanned
 
 The default bounded discovery includes `SKILL.md`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `README.md`, `.github/**`, `.cursor/**`, `.claude/**`, `.codex/**`, `scripts/**`, package manifests/lockfiles, Python metadata, Docker/Make files, and common shell, Python, JavaScript, JSX, TypeScript, TSX, and batch extensions (`.js`, `.mjs`, `.cjs`, `.jsx`, `.ts`, `.mts`, `.cts`, `.tsx`). `.git`, `node_modules`, `vendor`, `dist`, `build`, caches, binary files, and oversized files are excluded.
 
-## Examples
+## ✨ Examples
 
 Included fixtures exercise portable, OS-specific, shell-specific, Python, Node, mixed, and agent-instruction workflows:
 
@@ -95,13 +115,13 @@ agent-xplat scan tests/fixtures/node-ast --format json
 
 The fixture metadata in `tests/fixtures/*/expected.json` records expected rules, affected targets, severity, and confidence. It is test data, not a claim about a third-party tool's standard.
 
-## Rules, severity, and confidence
+## 🧩 Rules, severity, and confidence
 
 Rules are modular and use stable `AX-*` identifiers. They cover paths, shell commands and environment syntax, quoting, Python, Node package scripts and Node/JS/TS AST facts, filesystems, package managers, external tools, runtime assumptions, and agent configuration. JavaScript-family source is parsed structurally with Tree-sitter; dynamic strings and behavior still remain static inferences. See [docs/RULES.md](docs/RULES.md).
 
 Severity is one of `BLOCKER`, `ERROR`, `WARNING`, or `INFO`. Confidence is one of `HIGH`, `MEDIUM`, or `LOW`. A low-confidence assumption is reported as such and does not become a blocker merely because it is inconvenient.
 
-## Scan and reports
+## 📊 Scan and reports
 
 ```bash
 agent-xplat scan .
@@ -112,7 +132,7 @@ agent-xplat report .
 
 JSON is versioned (`schema_version: 1.0`) for agent and CI consumption and contains `targets`, `scores`, `findings`, `baseline`, `contract`, `verification`, and `summary`. SARIF output is version 2.1.0 and includes file, line, column, rule, level, message, and help. The Markdown report contains the executive summary, matrix, blocking issues, warnings, assumptions, contract violations, affected files, suggested fixes, evidence, ignored findings, and baseline status.
 
-## Safe fixes
+## 🛠️ Safe fixes
 
 ```bash
 agent-xplat fix . --dry-run
@@ -121,7 +141,7 @@ agent-xplat fix .
 
 Only deterministic, high-confidence, behavior-preserving fixes are eligible. v1.0 automatically normalizes CRLF shebang files to LF. Shell rewrites, path rewrites, environment syntax conversions, and dependency migrations remain suggestions because their equivalence cannot be proven from static text alone. Dry-run prints a unified patch and does not modify files.
 
-## Runtime verification
+## 🧪 Runtime verification
 
 ```bash
 agent-xplat test .
@@ -129,7 +149,7 @@ agent-xplat test .
 
 `scan` performs no target-code execution. `test` is explicit and bounded: it may run an allowlisted project test command with a timeout and records the actual host target, command, exit code, and output tail. A missing command is `INFERRED`, not `VERIFIED`. Runtime evidence from one host does not prove all matrix rows.
 
-## GitHub Actions and SARIF
+## ⚙️ GitHub Actions and SARIF
 
 ```bash
 agent-xplat init-ci
@@ -137,7 +157,7 @@ agent-xplat init-ci
 
 The generated workflow runs on `windows-latest`, `macos-latest`, and `ubuntu-latest`, installs the project, runs tests, performs a static scan, invokes controlled runtime verification, creates JSON/SARIF/Markdown artifacts, and uploads SARIF to Code Scanning. A workflow file existing locally is not evidence that the hosted jobs passed; the repository must run those jobs before claiming cross-OS verification.
 
-## Baseline and diff mode
+## 🧭 Baseline and diff mode
 
 ```bash
 agent-xplat baseline
@@ -148,7 +168,7 @@ agent-xplat scan . --diff HEAD~1 --format markdown
 
 Baselines distinguish existing, new, and resolved fingerprints. `--baseline-only` gates on new findings. Diff mode compares before/after scores and issue fingerprints from a Git reference without executing the reference tree.
 
-## Compatibility contract
+## 📐 Compatibility contract
 
 `.agent-xplat.yml` accepts declared support and requirements:
 
@@ -172,7 +192,7 @@ fail_on:
 
 The optional `agent-xplat:` wrapper is also accepted. Declared support is compared to detected assumptions and reported as `VIOLATION`; unsupported targets are not treated as contract failures.
 
-## Configuration and ignoring rules
+## 🧾 Configuration and ignoring rules
 
 ```bash
 agent-xplat init
@@ -188,7 +208,7 @@ chmod +x scripts/render.sh
 Ignored findings remain in machine-readable output with `ignored: true`, and the summary reports their count. Unknown keys, targets, severities, rule IDs, and invalid values fail with exit code 2.
 Unused line-level suppression markers are reported as suppression diagnostics instead of being silently accepted.
 
-## Agent-native usage and exit codes
+## 🤖 Agent-native usage and exit codes
 
 ```bash
 agent-xplat scan . --format json
@@ -203,7 +223,7 @@ agent-xplat scan . --format json
 
 Agents should consume `summary`, per-target `scores`, `findings`, and `contract.violations` rather than parsing terminal decoration.
 
-## Badge and doctor
+## 🩺 Badge and doctor
 
 ```bash
 agent-xplat badge
@@ -212,11 +232,11 @@ agent-xplat doctor
 
 The default badge says `Static Checked` and `Inference only`. A `Cross-OS Verified` badge must be backed by a verification artifact that records verified Windows, macOS, and Linux evidence; the badge label is never implied by a static scan. `doctor` only reports local availability of Git, Node, Python, Docker, PowerShell, Git Bash, WSL, Bash, and zsh. It does not inspect repository health.
 
-## Security model
+## 🛡️ Security model
 
 Default commands are offline, read-only with respect to the target source, non-executing, non-telemetric, and do not upload data. `test` is the only command that may execute a selected allowlisted project test command, and it has no shell operators, a bounded timeout, and a clear runtime evidence record. There is no AI API, SaaS backend, credential upload, or hidden network path.
 
-## Architecture
+## 🏗️ Architecture
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The core flow is:
 
@@ -226,18 +246,18 @@ Config -> bounded discovery -> structured/text parsers -> rule registry
       -> terminal / JSON / SARIF / Markdown / baseline / diff
 ```
 
-## Limitations and roadmap
+## ⚠️ Limitations and roadmap
 
 Static analysis cannot prove every shell version, installed tool, filesystem policy, native binary, dynamic command string, or runtime behavior. JavaScript-family source now has structured AST coverage for the supported suffixes, but dynamic evaluation, generated code, unsupported syntax recovery, and actual subprocess behavior remain runtime concerns. The release workflow is generated and documented, but hosted runner evidence must come from the user's GitHub repository. Future work may add more runtime adapters and independently reviewed rules without changing the public finding contract.
 
-## Release and verification
+## 📦 Release and verification
 
 The package is published to [PyPI](https://pypi.org/project/agent-xplat/) as a wheel and source distribution. The repository's [verification record](docs/audit/verification-run.md) documents local checks, hosted Windows/macOS/Linux evidence, package readback, and the boundary between inferred static findings and verified runtime results. Release changes are summarized in [CHANGELOG.md](CHANGELOG.md).
 
-## Contributing
+## 🤝 Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md), add a positive and negative fixture for every rule change, run `python -m pytest -q`, and preserve deterministic output. Do not add telemetry, network calls, secrets, or machine-specific paths.
 
-## License
+## 📄 License
 
 MIT. See [LICENSE](LICENSE).
