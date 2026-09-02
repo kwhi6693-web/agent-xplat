@@ -189,3 +189,43 @@ Evidence classification:
 - E4 — representative public branch synchronization plus three-hosted-OS post-push verification: `VALID`, PASS.
 
 Governance: Final Governance applicability was `REQUIRED` for the explicit public-branch write; the current user request supplied the authority for this bounded docs-only action, the destination readback matched the intended state, and no waiver or exception was used. No tag, Release, or PyPI publication was created or modified in this finalization run.
+
+## PUBLIC LAUNCH & DISTRIBUTION FINALIZATION
+
+Run ID: `VX-2026-09-02-004`<br>
+Project: `agent-xplat` 1.0.1<br>
+Target: public GitHub repository, PyPI distribution surface, GitHub Release, and final repository launch assets<br>
+Authority: current user request explicitly authorizing public documentation, launch assets, commit, push, and GitHub verification<br>
+Baseline: public `master` and local `HEAD` at `336559cd23197ffeb7ca2b504d18e6a6bd40e943`; local worktree clean before this run<br>
+Lifecycle: `AUDITED`
+
+Verification result: `PASS`<br>
+Completion status: `DONE` for the final launch-and-distribution scope<br>
+Public launch readiness: `PASS`
+
+| Check | Result |
+|---|---|
+| Current State Audit | PASS — public repository is public and unarchived; default branch is `master`; repository description and 15 Topics are present; public Release `v1.0.1` is non-draft and non-prerelease; the remote release tag remains bound to the published 1.0.1 release commit |
+| Fresh public PyPI install | PASS — a new Windows Python 3.12.10 virtual environment installed `agent-xplat` from `https://pypi.org/simple`; installed version `1.0.1`; no dependency-resolution warning/error |
+| Fresh CLI smoke | PASS — console entry point, `agent-xplat --help`, `agent-xplat --version`, `agent-xplat scan .`, `python -m agent_xplat --help`, runtime imports, and `pip check` all passed; self-scan returned eight `100/100 PASS` targets and zero findings |
+| Public metadata | PASS — PyPI name/version/description, Python `>=3.10`, MIT license expression, five project URLs, Markdown content type, package files, and project-page rendering remain valid |
+| Existing README state | PASS — public README was already PyPI-first; no duplicate README mutation was made; old GitHub Release wheel-first URL is absent |
+| Launch kit | PASS — added `docs/LAUNCH_KIT.md` with install copy, announcement copy, verified claims, honest boundaries, canonical links, asset references, and maintainer checklist |
+| Display asset | PASS — added `docs/assets/agent-xplat-launch-card.svg`; XML parse, dimensions, accessibility role, public copy, and no external resource dependency validated |
+| Local preflight | PASS — `88 passed`, `compileall`, self-scan, `git diff --check`, launch-kit assertions, SVG validation, and secret/private-path checks passed |
+| Commit and push | PASS — docs/assets-only commit `7dfadf2d7a0f44d840eb89a1cf82ed848fad5fd9` pushed to `master` without force or history rewrite |
+| Post-push workflow | PASS — Actions run `33586935176` for the new head completed successfully; `windows-latest`, `macos-latest`, and `ubuntu-latest` jobs all passed |
+| Destination readback | PASS — GitHub Contents and cache-busted raw readback for both new assets matched local blob/content bytes; both public raw files returned HTTP 200 |
+| Release assets | PASS — no attached GitHub Release file assets are required for this frozen distribution; the public PyPI wheel and sdist remain the distribution artifacts |
+| Scope | PASS — no portability rule, parser, scanner, CLI, schema, scoring, runtime architecture, version, tag, Release, PyPI artifact, or `.github/workflows/publish-pypi.yml` was modified |
+
+Evidence classification:
+
+- E1 — current-state repository/metadata/scope inspection and launch-asset content review: `VALID`.
+- E2 — fresh installation assertions, regression suite, compile, self-scan, XML validation, and launch-kit checks: `VALID`, PASS.
+- E3 — direct fresh PyPI behavior, public GitHub Contents/raw readback, public PyPI page/API, Release API, and Actions API: `VALID`, PASS.
+- E4 — representative new-user installation from public PyPI plus independent public destination and hosted-runner readback: `VALID`, PASS; the fresh package install itself was performed on Windows, while hosted workflow evidence covered all three runners.
+
+Known limitations: `pipx` is documented but was not directly executed because it is not installed on the validation host; the required `pip` path and console entry point were directly verified. The PyPI 1.0.1 long description remains an immutable release snapshot from publication time; the canonical public GitHub README and launch kit are current. The GitHub Release has no attached file assets because PyPI is the active distribution surface.
+
+Governance: Final Governance applicability was `REQUIRED` for the explicitly authorized public branch write. The current user request supplied the authority, destination readback matched the intended state, no waiver was used, and no tag/Release/PyPI publication mutation was performed.

@@ -55,4 +55,17 @@ This append-only log records factual run and gate references. It does not replac
 - Post-action verification: Actions run `33585200333` for the pushed head completed successfully on Windows, macOS, and Linux; v1.0.1 Release and PyPI package remained published and unchanged
 - Result: `PASS`; Completion status `DONE`; public launch readiness `PASS`
 - Scope proof: core source, version, Release assets, and `.github/workflows/publish-pypi.yml` were not modified
+
+## `AUDIT-VX-2026-09-02-004`
+
+- Run ID: `VX-2026-09-02-004`
+- Scope: final public state audit, fresh PyPI installation, launch kit and display asset creation, docs-only push, Actions verification, and public destination readback
+- Authority / target: current user request; public `kwhi6693-web/agent-xplat` repository, PyPI `agent-xplat`, and published Release `v1.0.1`
+- Baseline / write: clean public `master` at `336559cd23197ffeb7ca2b504d18e6a6bd40e943`; docs/assets-only commit `7dfadf2d7a0f44d840eb89a1cf82ed848fad5fd9` pushed without force or history rewrite
+- Fresh install: new Windows Python 3.12.10 environment installed public `agent-xplat==1.0.1`; console/module CLI, self-scan, imports, and `pip check` passed; dependency resolution was clean
+- Launch assets: `docs/LAUNCH_KIT.md` and `docs/assets/agent-xplat-launch-card.svg` passed local content/privacy/XML checks and independent GitHub Contents/raw readback
+- Hosted verification: Actions run `33586935176` for the new head completed successfully on Windows, macOS, and Linux
+- Public surfaces: repository metadata, Topics, default branch, README, Release `v1.0.1`, PyPI metadata/artifacts, and Markdown rendering were read back; no required state mismatch found
+- Result: `PASS`; Completion status `DONE`; public launch readiness `PASS`
+- Scope proof: no core implementation, package version, tag, Release, PyPI 1.0.1 artifact, or `.github/workflows/publish-pypi.yml` was modified
 - Final Governance applicability: `REQUIRED` for the explicit public-branch write; bounded user-authorized action, valid destination readback, no waiver/exception
