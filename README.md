@@ -14,18 +14,17 @@ Verified on real GitHub-hosted runners. The hosted jobs exercise Windows PowerSh
 
 Skill validators check structure and linters check style; agent-xplat checks the OS × Shell × Runtime assumptions that make an otherwise valid workflow fail on another platform.
 
-Fastest install from the published v1.0.1 release:
-
-```bash
-python -m pip install https://github.com/kwhi6693-web/agent-xplat/releases/download/v1.0.1/agent_xplat-1.0.1-py3-none-any.whl
-agent-xplat scan .
-```
-
-After a formal release has been published to PyPI through Trusted Publishing,
-the standard install is:
+Fastest install from PyPI:
 
 ```bash
 python -m pip install agent-xplat
+agent-xplat scan .
+```
+
+For an isolated CLI installation, `pipx` is also supported:
+
+```bash
+pipx install agent-xplat
 agent-xplat scan .
 ```
 
@@ -86,7 +85,7 @@ python -m agent_xplat scan . --format json
 
 ## Installation
 
-Python 3.10 or newer is required. The v1.0.1 GitHub Release publishes a wheel and source distribution; the direct wheel URL is shown above. The runtime package includes the small Tree-sitter parser bindings needed for JavaScript/JSX/TypeScript/TSX AST analysis; `pytest` is only a development extra. `pipx install .` is a convenient isolated CLI installation when working from a release checkout.
+Python 3.10 or newer is required. The package is published on PyPI as a wheel and source distribution. Use `python -m pip install agent-xplat` in an active virtual environment, or `pipx install agent-xplat` for an isolated CLI installation. The runtime package includes the small Tree-sitter parser bindings needed for JavaScript/JSX/TypeScript/TSX AST analysis; `pytest` is only a development extra. `pipx install .` remains a convenient isolated CLI installation when working from a source checkout.
 
 ## Supported environments
 

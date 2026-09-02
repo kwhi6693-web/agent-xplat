@@ -34,3 +34,13 @@ This append-only log records factual run and gate references. It does not replac
 - Governance applicability: `REQUIRED` under the public-repository publication rule; the bounded action was explicitly authorized by the current user request and no formal tag/release asset was published
 - Final Governance decision: `APPROVED` for the authorized bounded repository push and hosted evidence readback
 - Package: `docs/audit/gate-decision-package.md`
+
+## `AUDIT-VX-2026-09-02-002`
+
+- Run ID: `VX-2026-09-02-002`
+- Scope: fresh public PyPI installation of `agent-xplat` 1.0.1, CLI/entry-point/runtime dependency smoke, public package metadata and README rendering readback, publish workflow readback, and installation-document review
+- Target / environment: public PyPI and GitHub `master`; fresh Windows Python 3.12.10 virtual environment
+- Result: public package installation, runtime behavior, dependency resolution, artifact hash/archive, metadata, README rendering, and workflow readback `PASS`; local README changed to PyPI-first installation; public GitHub README synchronization `BLOCKED` because no push was authorized under the active project scope
+- Evidence: `docs/audit/verification-run.md`, [PyPI metadata](https://pypi.org/pypi/agent-xplat/json), [PyPI project page](https://pypi.org/project/agent-xplat/), [workflow run 33531926116](https://github.com/kwhi6693-web/agent-xplat/actions/runs/33531926116), and public raw README readback
+- Core implementation and `.github/workflows/publish-pypi.yml` were not modified; only `README.md` plus the two audit records named in this run changed locally
+- Governance applicability: `NOT REQUIRED` for the read-only public readback and local documentation edit; no external write was attempted

@@ -114,3 +114,43 @@ Evidence classification:
 - E4 — the external `v1.0.1` Release event and PyPI workflow outcome were not yet run when this preflight was recorded.
 
 The release gate remains open until the commit/tag/release and the triggered PyPI workflow are independently read back. Any manual approval request or workflow failure is a terminal stop under the current task.
+
+## v1.0.1 public PyPI installation readback
+
+Run ID: `VX-2026-09-02-002`
+Project: `agent-xplat` 1.0.1
+Target: public PyPI package and public GitHub `master` README
+Environment: fresh Windows virtual environment, Python 3.12.10; package index explicitly set to `https://pypi.org/simple`; pip cache disabled
+Lifecycle: `AUDITED`
+Overall result: `PARTIAL` — public package installation and metadata/runtime checks passed; the local README was corrected, but the public GitHub README remains unchanged because no push was authorized under the active project scope.
+
+| Check | Result |
+|---|---|
+| `python -m pip install --upgrade agent-xplat` | PASS — exit code 0; installed `agent-xplat-1.0.1`, `tree-sitter-0.26.0`, `tree-sitter-javascript-0.25.0`, and `tree-sitter-typescript-0.23.2` from public PyPI; no dependency resolution warning/error, only pip's self-update notice |
+| Installed distribution version | PASS — `1.0.1` in the fresh environment |
+| Console entry point | PASS — `agent-xplat` resolved to the fresh environment; `agent-xplat --version` returned `1.0.1`; metadata maps to `agent_xplat.cli:main` |
+| `agent-xplat --help` | PASS — exit code 0 |
+| `agent-xplat scan .` | PASS — exit code 0; eight target rows at `100/100 PASS`, zero findings |
+| `python -m agent_xplat --help` | PASS — exit code 0 |
+| Runtime dependency imports | PASS — `tree_sitter`, `tree_sitter_javascript`, and `tree_sitter_typescript` imported successfully |
+| `python -m pip check` | PASS — `No broken requirements found.` |
+| Fresh smoke rerun | PASS — version, console help, scan, module help, dependency check, and imports all returned exit code 0 |
+| Public wheel readback | PASS — `agent_xplat-1.0.1-py3-none-any.whl`, 70,907 bytes, SHA-256 `e2d41774cec932a85de5abc42acebf3eefaffb56c19e08e1e2428d0ed3839d52`; archive contains the package/entry point and no `tests/` or `docs/` paths |
+| Public wheel metadata | PASS — name `agent-xplat`, version `1.0.1`, Python `>=3.10`, MIT license expression, and console entry point present |
+| PyPI JSON metadata | PASS — description, Markdown content type, five project URLs, runtime requirements, and wheel/sdist records match the release contract |
+| PyPI README rendering | PASS — project page HTTP 200; rendered description panel, heading, README body, and code block are present |
+| Publish workflow readback | PASS — run `33531926116` is `release`/`completed`/`success`; head SHA `5b4ffe72d10d8f95eea4d6132709b9066656fcf3`; both jobs passed and the `Publish package distributions to PyPI` step passed |
+| Local README update | PASS — the first-screen install path now prefers `pipx install agent-xplat` with `python -m pip install agent-xplat` fallback; `git diff --check` passed |
+| Local regression after README update | PASS — `python -m pytest -q` returned `88 passed`; `compileall` and local wheel `twine==7.0.0 check` passed |
+| Public GitHub `master` README readback | BLOCKED — raw public README still contains the GitHub Release wheel as “Fastest install” and does not contain the new PyPI-first text; the local correction has not been pushed |
+
+Evidence classification:
+
+- E1 — scoped diff and public-source metadata/README inspection: `VALID`; only `README.md` is locally changed, with core source and `.github/workflows/publish-pypi.yml` untouched.
+- E2 — pytest, compile, local wheel build, isolated `twine check`, deterministic assertions, and `pip check`: `VALID`, PASS.
+- E3 — fresh public PyPI install, CLI behavior, dependency imports, public wheel archive/hash readback, and rendered PyPI project page: `VALID`, PASS.
+- E4 — representative new-user installation from public PyPI on a fresh Windows Python environment and independent public workflow/package readback: `VALID`, PASS for package distribution; cross-OS installation remains outside this single-host run.
+
+Verification harness recoveries were preserved in the execution history: one version probe had a WindowsPath string-formatting error and was rerun with a corrected assertion; one PyPI DOM probe used the wrong element names and was rerun against the actual project-description structure; one workflow probe initially treated a publish step as a job and was rerun with job/step separation; the development environment lacked `twine`, so the pinned tool was run in an isolated packaging-tools environment. None of these recoveries identified a package or release failure.
+
+Known limitation: `pipx` is not installed on the validation host, so the advertised pipx command was not directly executed; the package's console entry point was verified through the required fresh `pip` installation. The public PyPI 1.0.1 README is a release snapshot and still renders the pre-update GitHub-wheel-first wording; changing that immutable release description would require a future package release.
