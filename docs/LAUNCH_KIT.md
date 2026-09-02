@@ -93,6 +93,10 @@ agent-xplat scan .
 
 ## Display assets
 
+- [GitHub Social Preview PNG](assets/agent-xplat-social-preview.png) — final
+  1280 × 640, opaque, upload-ready preview image.
+- [Editable Social Preview SVG](assets/agent-xplat-social-preview.svg) — the
+  editable source for the PNG.
 - [Launch card](assets/agent-xplat-launch-card.svg) — public announcement and
   social-preview artwork.
 - [Cross-OS Verified badge](assets/agent-xplat-verified.svg) — README status
