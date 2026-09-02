@@ -229,3 +229,43 @@ Evidence classification:
 Known limitations: `pipx` is documented but was not directly executed because it is not installed on the validation host; the required `pip` path and console entry point were directly verified. The PyPI 1.0.1 long description remains an immutable release snapshot from publication time; the canonical public GitHub README and launch kit are current. The GitHub Release has no attached file assets because PyPI is the active distribution surface.
 
 Governance: Final Governance applicability was `REQUIRED` for the explicitly authorized public branch write. The current user request supplied the authority, destination readback matched the intended state, no waiver was used, and no tag/Release/PyPI publication mutation was performed.
+
+## GITHUB SOCIAL PREVIEW FINALIZATION
+
+Run ID: `VX-2026-09-02-005`<br>
+Project: `agent-xplat` 1.0.1<br>
+Target: public README presentation plus `docs/assets/agent-xplat-social-preview.png` and editable SVG source<br>
+Authority: current user request specifying the GitHub Social Preview constraints and authorizing repository asset publication<br>
+Baseline: public `master` and local `HEAD` at `4324c4d08fe1e641f12aebc1426c7a19986d62eb`; existing launch card was inspected and intentionally not reused because it was 1200 × 630 with a gradient background<br>
+Lifecycle: `AUDITED`
+
+Verification result: `PASS`<br>
+Completion status: `DONE` for the Social Preview asset scope<br>
+
+| Check | Result |
+|---|---|
+| PNG dimensions | PASS — exactly `1280 × 640` pixels, 2:1 aspect ratio |
+| PNG size and decode | PASS — `39,170` bytes, PNG signature valid, normal decode succeeded, and file is strictly below 1 MB |
+| Background | PASS — opaque, solid `#0f172a` outer background; no transparent pixels |
+| Safe area / crop | PASS — non-background bounds are `96,72` through `1183,567`; all four outer margins are at least 72 px; every text slot stayed inside its declared safe rectangle |
+| Required content | PASS — `agent-xplat`, `Cross-OS portability`, `for AI agent workflows`, `Windows ✓`, `macOS ✓`, `Linux ✓`, `Runtime Verified`, and the required tagline are present in the SVG and rendered text slots |
+| README presentation | PASS — the related public README change preserves the PyPI-first install path and references the final Social Preview PNG; no private data or old Release-wheel URL was introduced |
+| SVG dependencies | PASS — no external image, font file, CSS font-face, URL, or repository font asset; only system-font fallback names are declared |
+| SVG/PNG consistency | PASS — PNG was rendered from the same fixed text/layout specification; required SVG text nodes and all corresponding rendered PNG slots were detected |
+| Security scan | PASS — no private path, username, hostname, token, API key, secret, password, private key, false metric, Stars, downloads, users, or benchmark claim |
+| Local formatting | PASS — `git diff --check` passed after staging; no core files were changed |
+| Commit and push | PASS — `36b3dc50f78f84fa159bdbfc7b2f4fa08f9e1a89` pushed the assets; the related README/audit documentation change is included in the final docs-only push without force or history rewrite |
+| Hosted workflow | PASS — Actions run `33588119064` for the asset commit completed successfully on Windows, macOS, and Linux |
+| Public destination readback | PASS — GitHub Contents/blob and raw byte readback matched the local README and both assets; PNG SHA-256 `db6eae2903b4298f1aca4b15683569ea34f299f629398cec148efcf8b4da4e18`; SVG SHA-256 `f926b474a7e708423d13ab8bf17665f357e8171024c261a130458de9673d20a1` |
+| Frozen release surfaces | PASS — package version, `v1.0.1` tag/Release, PyPI artifacts, core code, and `publish-pypi.yml` were not modified |
+
+Evidence classification:
+
+- E1 — old asset inspection, SVG source/security inspection, and scope inspection: `VALID`.
+- E2 — deterministic PNG generation, dimension/size/decode/pixel-bound checks, text-slot checks, XML checks, and staged diff check: `VALID`, PASS.
+- E3 — visual inspection, GitHub Contents/raw asset readback, public branch readback, Release/PyPI state readback, and hosted Actions API readback: `VALID`, PASS.
+- E4 — public raw byte equality and three-hosted-OS post-push verification: `VALID`, PASS.
+
+MANUAL ACTION: GitHub Social Preview itself is uploaded at repository `Settings` → `General` → `Social preview` → `Upload an image`; the repository-ready PNG is the asset recorded above. This UI setting is optional for repository launch readiness and was not changed by the repository commit.
+
+Governance: Final Governance applicability was `REQUIRED` for the explicitly authorized public branch asset write. The current user request supplied the authority, destination readback matched the intended state, no waiver was used, and no Release/PyPI publication mutation was performed.

@@ -1,38 +1,42 @@
 # agent-xplat
 
-[![Cross-OS Verified](docs/assets/agent-xplat-verified.svg)](https://github.com/kwhi6693-web/agent-xplat/actions/workflows/agent-xplat.yml)
+> Find the OS assumptions that break AI-agent workflows.
 
-Find the OS assumptions that break AI-agent workflows.
+[![PyPI](https://img.shields.io/pypi/v/agent-xplat?style=flat-square)](https://pypi.org/project/agent-xplat/)
+[![Python](https://img.shields.io/pypi/pyversions/agent-xplat?style=flat-square)](https://pypi.org/project/agent-xplat/)
+[![Cross-OS Verified](https://img.shields.io/badge/Cross--OS%20Verified-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-2ea44f?style=flat-square)](https://github.com/kwhi6693-web/agent-xplat/actions/workflows/agent-xplat.yml)
+[![CI](https://github.com/kwhi6693-web/agent-xplat/actions/workflows/agent-xplat.yml/badge.svg?branch=master&style=flat-square)](https://github.com/kwhi6693-web/agent-xplat/actions/workflows/agent-xplat.yml)
+[![License](https://img.shields.io/github/license/kwhi6693-web/agent-xplat?style=flat-square)](LICENSE)
 
-Windows ✓<br>
-macOS ✓<br>
-Linux ✓
+![agent-xplat — Cross-OS portability for AI-agent workflows](docs/assets/agent-xplat-social-preview.png)
 
-Verified on real GitHub-hosted runners. The hosted jobs exercise Windows PowerShell, macOS zsh, and Linux bash; the static scan covers the full eight-target OS × Shell × Runtime matrix.
+## Why agent-xplat
 
-`agent-xplat` is a deterministic cross-OS portability checker for AI agent workflows, Agent Skills, agent configuration, and related scripts. It reports where a workflow can fail across **Windows, macOS, and Linux**, including the shell and runtime context—not just the operating system.
+AI-agent workflows combine Markdown instructions, shell commands, Python, Node, package managers, and external tools. A workflow that is valid in Linux Bash can still fail in Windows PowerShell, Windows CMD, Git Bash, WSL, or macOS zsh.
 
-Skill validators check structure and linters check style; agent-xplat checks the OS × Shell × Runtime assumptions that make an otherwise valid workflow fail on another platform.
+`agent-xplat` is a deterministic cross-OS portability checker for AI-agent workflows, Agent Skills, agent configuration, and related scripts. It reports the **OS × Shell × Runtime** assumptions behind a failure—not just the operating system.
 
-Fastest install from PyPI:
+Skill validators check structure, and general linters check style. `agent-xplat` checks whether those otherwise-valid workflows can survive the environments where agents actually run. It is deliberately not a security scanner, Agent Skill schema validator, benchmark, general linter, or repository health tool.
+
+The current verification path exercises real GitHub-hosted Windows, macOS, and Linux runners. Static analysis covers the full eight-target matrix; static findings remain `INFERRED`, while only a real runner or controlled local runtime check produces `VERIFIED` evidence.
+
+## Quick Start
+
+Install the published package from PyPI and scan the current repository:
 
 ```bash
 python -m pip install agent-xplat
 agent-xplat scan .
 ```
 
-For an isolated CLI installation, `pipx` is also supported:
+For an isolated CLI installation:
 
 ```bash
 pipx install agent-xplat
 agent-xplat scan .
 ```
 
-```text
-agent-xplat scan .
-```
-
-Example from the included mixed-platform fixture:
+The scan produces a deterministic, target-specific compatibility matrix:
 
 ```text
 Agent Workflow Portability
@@ -53,35 +57,7 @@ Linux / zsh               56/100 PARTIAL          4
 7 portability issues found (0 ignored)
 ```
 
-The scores are deterministic and explainable. Static findings are marked as inferred; only a real runner or local runtime check can produce verified evidence.
-
-## Why it exists
-
-Agent workflows often mix Markdown instructions, shell snippets, Python, Node scripts, package managers, and external tools. A workflow can be valid on Linux Bash and still fail in Windows PowerShell, Windows CMD, Git Bash, WSL, or macOS zsh. General linters and security scanners are not designed to answer that portability question.
-
-The boundary is deliberate: agent-xplat is not a security scanner, Agent Skill schema validator, benchmark, general linter, or repository health tool. It focuses on **Cross-OS Runtime Portability for AI Agent Workflows**.
-
-## Quick start
-
-Install from a checkout:
-
-```bash
-python -m pip install .
-agent-xplat scan .
-```
-
-For development:
-
-```bash
-python -m pip install -e ".[dev]"
-python -m pytest -q
-```
-
-The module invocation is always available as a fallback:
-
-```bash
-python -m agent_xplat scan . --format json
-```
+The scores are deterministic and explainable. The included output is a mixed-platform fixture example, not a claim about every repository.
 
 ## Installation
 
@@ -166,13 +142,13 @@ The generated workflow runs on `windows-latest`, `macos-latest`, and `ubuntu-lat
 ```bash
 agent-xplat baseline
 agent-xplat scan . --baseline-only
-agent-xplat scan . --diff main
+agent-xplat scan . --diff master
 agent-xplat scan . --diff HEAD~1 --format markdown
 ```
 
 Baselines distinguish existing, new, and resolved fingerprints. `--baseline-only` gates on new findings. Diff mode compares before/after scores and issue fingerprints from a Git reference without executing the reference tree.
 
-## Compatibility Contract
+## Compatibility contract
 
 `.agent-xplat.yml` accepts declared support and requirements:
 
@@ -253,6 +229,10 @@ Config -> bounded discovery -> structured/text parsers -> rule registry
 ## Limitations and roadmap
 
 Static analysis cannot prove every shell version, installed tool, filesystem policy, native binary, dynamic command string, or runtime behavior. JavaScript-family source now has structured AST coverage for the supported suffixes, but dynamic evaluation, generated code, unsupported syntax recovery, and actual subprocess behavior remain runtime concerns. The release workflow is generated and documented, but hosted runner evidence must come from the user's GitHub repository. Future work may add more runtime adapters and independently reviewed rules without changing the public finding contract.
+
+## Release and verification
+
+The package is published to [PyPI](https://pypi.org/project/agent-xplat/) as a wheel and source distribution. The repository's [verification record](docs/audit/verification-run.md) documents local checks, hosted Windows/macOS/Linux evidence, package readback, and the boundary between inferred static findings and verified runtime results. Release changes are summarized in [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
 

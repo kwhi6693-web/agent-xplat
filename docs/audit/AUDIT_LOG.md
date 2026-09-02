@@ -68,4 +68,17 @@ This append-only log records factual run and gate references. It does not replac
 - Public surfaces: repository metadata, Topics, default branch, README, Release `v1.0.1`, PyPI metadata/artifacts, and Markdown rendering were read back; no required state mismatch found
 - Result: `PASS`; Completion status `DONE`; public launch readiness `PASS`
 - Scope proof: no core implementation, package version, tag, Release, PyPI 1.0.1 artifact, or `.github/workflows/publish-pypi.yml` was modified
+
+## `AUDIT-VX-2026-09-02-005`
+
+- Run ID: `VX-2026-09-02-005`
+- Scope: strict GitHub Social Preview PNG/SVG creation, programmatic validation, docs-only publication, hosted workflow verification, and public asset readback
+- Authority / target: current user request; `agent-xplat` repository public asset paths `docs/assets/agent-xplat-social-preview.png` and `.svg`
+- Baseline / write: clean public `master` at `4324c4d08fe1e641f12aebc1426c7a19986d62eb`; the pre-existing 1200 × 630 gradient launch card was not reused; asset commit `36b3dc50f78f84fa159bdbfc7b2f4fa08f9e1a89` was pushed without force
+- Validation: PNG exactly 1280 × 640, 39,170 bytes, decodable and opaque; safe margins passed; all required text slots passed; SVG has no external font/image dependency; SVG/PNG content and security scans passed
+- Hosted verification: Actions run `33588119064` completed successfully on Windows, macOS, and Linux
+- Public readback: GitHub Contents and raw bytes matched the local PNG/SVG; PNG SHA-256 `db6eae2903b4298f1aca4b15683569ea34f299f629398cec148efcf8b4da4e18`; SVG SHA-256 `f926b474a7e708423d13ab8bf17665f357e8171024c261a130458de9673d20a1`
+- Related README presentation change was inspected and retained: it adds the final Social Preview PNG reference while preserving the PyPI-first installation path and contains no private data
+- Frozen surfaces: core source, package version, `v1.0.1` tag/Release, PyPI artifacts, and `.github/workflows/publish-pypi.yml` were unchanged
+- Result: `PASS`; Completion status `DONE`; Social Preview assets are upload-ready
 - Final Governance applicability: `REQUIRED` for the explicit public-branch write; bounded user-authorized action, valid destination readback, no waiver/exception
