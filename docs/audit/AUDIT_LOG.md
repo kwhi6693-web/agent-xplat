@@ -44,3 +44,15 @@ This append-only log records factual run and gate references. It does not replac
 - Evidence: `docs/audit/verification-run.md`, [PyPI metadata](https://pypi.org/pypi/agent-xplat/json), [PyPI project page](https://pypi.org/project/agent-xplat/), [workflow run 33531926116](https://github.com/kwhi6693-web/agent-xplat/actions/runs/33531926116), and public raw README readback
 - Core implementation and `.github/workflows/publish-pypi.yml` were not modified; only `README.md` plus the two audit records named in this run changed locally
 - Governance applicability: `NOT REQUIRED` for the read-only public readback and local documentation edit; no external write was attempted
+
+## `AUDIT-VX-2026-09-02-003`
+
+- Run ID: `VX-2026-09-02-003`
+- Scope: final public README synchronization to GitHub `master`, destination readback, and post-push cross-OS workflow verification
+- Authority / target: current user request; `https://github.com/kwhi6693-web/agent-xplat`, branch `master`
+- Baseline / write: remote `master` was verified at `5b4ffe72d10d8f95eea4d6132709b9066656fcf3`; docs-only commit `6fc6ece1f54c043249627c9b5babd5b06dab5805` was pushed with no force or history rewrite
+- Destination readback: branch SHA, GitHub Contents API README blob, and cache-busted raw README all matched the intended pip-first content; old Release wheel-first wording was absent
+- Post-action verification: Actions run `33585200333` for the pushed head completed successfully on Windows, macOS, and Linux; v1.0.1 Release and PyPI package remained published and unchanged
+- Result: `PASS`; Completion status `DONE`; public launch readiness `PASS`
+- Scope proof: core source, version, Release assets, and `.github/workflows/publish-pypi.yml` were not modified
+- Final Governance applicability: `REQUIRED` for the explicit public-branch write; bounded user-authorized action, valid destination readback, no waiver/exception

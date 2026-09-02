@@ -154,3 +154,38 @@ Evidence classification:
 Verification harness recoveries were preserved in the execution history: one version probe had a WindowsPath string-formatting error and was rerun with a corrected assertion; one PyPI DOM probe used the wrong element names and was rerun against the actual project-description structure; one workflow probe initially treated a publish step as a job and was rerun with job/step separation; the development environment lacked `twine`, so the pinned tool was run in an isolated packaging-tools environment. None of these recoveries identified a package or release failure.
 
 Known limitation: `pipx` is not installed on the validation host, so the advertised pipx command was not directly executed; the package's console entry point was verified through the required fresh `pip` installation. The public PyPI 1.0.1 README is a release snapshot and still renders the pre-update GitHub-wheel-first wording; changing that immutable release description would require a future package release.
+
+## PUBLIC LAUNCH FINALIZATION
+
+Run ID: `VX-2026-09-02-003`
+Project: `agent-xplat` 1.0.1
+Target: public GitHub `master` README and the already-published PyPI/Release surfaces
+Authority: current user request explicitly authorizing the bounded README synchronization
+Baseline: `master` at `5b4ffe72d10d8f95eea4d6132709b9066656fcf3`; remote baseline matched before the write
+Lifecycle: `AUDITED`
+Verification result: `PASS`
+Completion status: `DONE` for the finalization scope
+Public launch readiness: `PASS`
+
+| Check | Result |
+|---|---|
+| README content | PASS — first install path is exactly `python -m pip install agent-xplat` followed by `agent-xplat scan .`; `pipx install agent-xplat` remains an optional isolated-install path |
+| Local preflight | PASS — README assertion, `git diff --check`, `python -m pytest -q` (`88 passed`), `compileall`, local wheel build, and pinned `twine check` all passed |
+| Commit | PASS — `6fc6ece1f54c043249627c9b5babd5b06dab5805`, docs-only change containing README and the two audit records |
+| Push | PASS — `git push origin master` advanced `5b4ffe7` to `6fc6ece` without force or history rewrite |
+| Branch readback | PASS — public `refs/heads/master` equals `6fc6ece1f54c043249627c9b5babd5b06dab5805` |
+| README destination readback | PASS — GitHub Contents API blob SHA `6485fe462b5f538a2696e22d9982409f29839663` matches the pushed commit; pip-first text is present and the old wheel URL/heading is absent |
+| Raw public README | PASS — cache-busted raw GitHub readback returns HTTP 200 and the expected public content |
+| Post-push cross-OS workflow | PASS — run `33585200333` for head `6fc6ece1f54c043249627c9b5babd5b06dab5805` completed successfully; `windows-latest`, `macos-latest`, and `ubuntu-latest` jobs all passed |
+| v1.0.1 Release | PASS — public Release `v1.0.1` remains published, non-draft, and non-prerelease |
+| PyPI package | PASS — public PyPI package remains `agent-xplat` version `1.0.1`; prior fresh-install, artifact, metadata, and dependency readback remain valid |
+| Scope | PASS — no core source, version, release asset, or `.github/workflows/publish-pypi.yml` change |
+
+Evidence classification:
+
+- E1 — local diff and exact public destination content inspection: `VALID`.
+- E2 — README assertion, full regression, compile, wheel build, and `twine check`: `VALID`, PASS.
+- E3 — public GitHub branch/Contents/raw readback and workflow API readback: `VALID`, PASS.
+- E4 — representative public branch synchronization plus three-hosted-OS post-push verification: `VALID`, PASS.
+
+Governance: Final Governance applicability was `REQUIRED` for the explicit public-branch write; the current user request supplied the authority for this bounded docs-only action, the destination readback matched the intended state, and no waiver or exception was used. No tag, Release, or PyPI publication was created or modified in this finalization run.
