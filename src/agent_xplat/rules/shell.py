@@ -7,6 +7,7 @@ import re
 from ..environments import is_native_windows
 from ..models import Confidence, Severity, Finding, SourceFile
 from ..parsers import javascript_suffixes
+from .markdown_shell import shell_examples
 from .common import RuleContext, RuleSpec, line_matches, make_finding
 
 
@@ -52,6 +53,8 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
     # here would create a false positive outside an actual child-process call.
     if source.path.suffix.lower() in javascript_suffixes():
         return []
+    original = source
+    source = shell_examples(source)
     findings: list[Finding] = []
     native_windows = _native_windows(context)
     for line_index, line, match in line_matches(source, r"\bchmod\s+(?:[+\-][rwxXst]+\s+)?[^\s`]+", re.IGNORECASE):
@@ -177,4 +180,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
         )
         if finding:
             findings.append(finding)
+    for finding in findings:
+        if finding is not None:
+            finding.code = original.lines[finding.location.line - 1].strip()
     return [finding for finding in findings if finding is not None]

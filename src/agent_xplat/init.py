@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
+
+from . import __version__
 
 
 DEFAULT_CONFIG = """# agent-xplat configuration
@@ -26,7 +29,7 @@ fail_on:
 """
 
 
-CI_WORKFLOW = """name: agent-xplat
+CI_WORKFLOW = r"""name: Agent workflow portability
 
 on:
   push:
@@ -34,61 +37,65 @@ on:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
-  portability:
-    name: ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+  static-portability:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install project
-        run: python -m pip install -e ".[dev]"
-      - name: Tests
-        run: python -m pytest -q
-      - name: Static portability scan
-        id: static_scan
-        continue-on-error: true
-        run: python -m agent_xplat scan . --format json --output agent-xplat-scan.json
-      - name: Controlled runtime verification
-        id: runtime_verification
-        continue-on-error: true
-        run: python -m agent_xplat test . --format json --output agent-xplat-verification.json
-      - name: Markdown report
-        if: always()
-        run: python -m agent_xplat report . --output agent-xplat-report.md
-      - name: Upload SARIF and reports
-        if: always()
-        run: python -m agent_xplat scan . --format sarif --output agent-xplat.sarif
-      - name: Upload artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Install the scanner (not the scanned project)
+        run: python -I -m pip install 'TOOL_SPEC'
+      - uses: actions/checkout@v4
         with:
-          name: agent-xplat-${{ matrix.os }}
-          path: |
-            agent-xplat-scan.json
-            agent-xplat-verification.json
-            agent-xplat-report.md
-            agent-xplat.sarif
-      - name: Upload SARIF to code scanning
+          path: target
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan and preserve gate outcome
+        id: scan
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mkdir -p reports
+          args=(target --baseline-only)
+          if [[ -n "$BASE_SHA" ]]; then
+            args+=(--diff "$BASE_SHA")
+          fi
+          status=0
+          for format in json markdown sarif; do
+            code=0
+            python -I -m agent_xplat scan "${args[@]}" --format "$format" --output "reports/scan.$format" || code=$?
+            if (( code > status )); then status=$code; fi
+          done
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+      - name: Publish readable summary
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        shell: bash
+        run: |
+          if [[ -f reports/scan.markdown ]]; then
+            head -c 900000 reports/scan.markdown >> "$GITHUB_STEP_SUMMARY"
+            printf '\n\nFull reports are available in the workflow artifacts.\n' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          sarif_file: agent-xplat.sarif
-      - name: Enforce static portability gate
-        if: always() && steps.static_scan.outcome == 'failure'
-        run: exit 1
-      - name: Enforce runtime verification gate
-        if: always() && steps.runtime_verification.outcome == 'failure'
-        run: exit 1
+          name: agent-xplat-static-reports
+          path: reports/
+          if-no-files-found: warn
+      - name: Enforce portability gate
+        if: always()
+        env:
+          SCAN_EXIT: ${{ steps.scan.outputs.exit_code }}
+        run: |
+          case "$SCAN_EXIT" in
+            0) exit 0 ;;
+            1|2|3) exit "$SCAN_EXIT" ;;
+            *) echo 'Scanner did not complete'; exit 3 ;;
+          esac
 """
+
 
 
 def write_init(root: Path, force: bool = False) -> Path:
@@ -99,12 +106,16 @@ def write_init(root: Path, force: bool = False) -> Path:
     return path
 
 
-def write_ci(root: Path, force: bool = False) -> Path:
+def write_ci(root: Path, force: bool = False, tool_ref: str | None = None) -> Path:
     path = Path(root) / ".github" / "workflows" / "agent-xplat.yml"
     if path.exists() and not force:
         raise FileExistsError(f"workflow already exists: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(CI_WORKFLOW, encoding="utf-8")
+    if tool_ref is not None and not re.fullmatch(r"[0-9a-f]{40}", tool_ref):
+        raise ValueError("tool-ref must be a full lowercase 40-character commit SHA")
+    spec = (f"agent-xplat @ git+https://github.com/kwhi6693-web/agent-xplat.git@{tool_ref}"
+            if tool_ref else f"agent-xplat=={__version__}")
+    path.write_text(CI_WORKFLOW.replace("TOOL_SPEC", spec), encoding="utf-8")
     return path
 
 

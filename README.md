@@ -12,6 +12,9 @@
 
 ![agent-xplat — Cross-OS portability for AI-agent workflows](docs/assets/agent-xplat-social-preview.png)
 
+
+**Development preview:** 1.0.2 changes are unreleased; install and pin this PR commit using [CI adoption](docs/CI_ADOPTION.md). The current published version remains 1.0.1. Read the [ten-repository study](docs/audit/real-world-study.md) before enabling required checks.
+
 ## Why agent-xplat
 
 AI-agent workflows combine Markdown instructions, shell commands, Python, Node, package managers, and external tools. A workflow that is valid in Linux Bash can still fail in Windows PowerShell, Windows CMD, Git Bash, WSL, or macOS zsh.
@@ -47,16 +50,18 @@ Agent Workflow Portability
 Compatibility Matrix
 ---------------------
 Environment                Score Status    Findings
-Windows / PowerShell      41/100 BLOCKED          4
-Windows / CMD              1/100 BLOCKED          6
-Windows / Git Bash        76/100 PARTIAL          3
-Windows / WSL             76/100 PARTIAL          3
-macOS / zsh               56/100 PARTIAL          4
-macOS / bash              56/100 PARTIAL          4
-Linux / bash              56/100 PARTIAL          4
-Linux / zsh               56/100 PARTIAL          4
+Windows / PowerShell      43/100 BLOCKED          3
+Windows / CMD              3/100 BLOCKED          5
+Windows / Git Bash        78/100 PARTIAL          2
+Windows / WSL             78/100 PARTIAL          2
+macOS / zsh               58/100 PARTIAL          3
+macOS / bash              58/100 PARTIAL          3
+Linux / bash              58/100 PARTIAL          3
+Linux / zsh               58/100 PARTIAL          3
 
-7 portability issues found (0 ignored)
+6 portability issues found (0 ignored)
+
+Findings
 ```
 
 The scores are deterministic and explainable. The included output is a mixed-platform fixture example, not a claim about every repository.
@@ -157,7 +162,7 @@ agent-xplat test .
 agent-xplat init-ci
 ```
 
-The generated workflow runs on `windows-latest`, `macos-latest`, and `ubuntu-latest`, installs the project, runs tests, performs a static scan, invokes controlled runtime verification, creates JSON/SARIF/Markdown artifacts, and uploads SARIF to Code Scanning. A workflow file existing locally is not evidence that the hosted jobs passed; the repository must run those jobs before claiming cross-OS verification.
+The generated consumer workflow installs only the scanner, performs a static scan on Ubuntu, compares PRs with their base commit, and publishes Job Summary plus JSON/SARIF/Markdown artifacts with `contents: read`. It does not install or execute the scanned project. The separate project development workflow retains real Windows/macOS/Linux tests. See [CI adoption](docs/CI_ADOPTION.md) for preview installation, baselines, policy and evidence boundaries.
 
 ## 🧭 Baseline and diff mode
 

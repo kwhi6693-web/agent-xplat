@@ -12,6 +12,9 @@
 
 ![agent-xplat — Cross-OS portability for AI-agent workflows](docs/assets/agent-xplat-social-preview.png)
 
+
+**开发预览：**1.0.2 改动尚未发布；请按 [CI 接入说明](docs/CI_ADOPTION.md) 安装并固定本 PR 的完整提交 SHA。当前已发布版本仍为 1.0.1。启用强制检查前请阅读 [10 个真实仓库研究](docs/audit/real-world-study.md)。
+
 ## 为什么是 agent-xplat
 
 AI Agent 工作流通常会组合 Markdown 指令、Shell 命令、Python、Node、包管理器和外部工具。一个在 Linux Bash 中有效的工作流，仍可能在 Windows PowerShell、Windows CMD、Git Bash、WSL 或 macOS zsh 中失败。
@@ -47,16 +50,18 @@ Agent Workflow Portability
 Compatibility Matrix
 ---------------------
 Environment                Score Status    Findings
-Windows / PowerShell      41/100 BLOCKED          4
-Windows / CMD              1/100 BLOCKED          6
-Windows / Git Bash        76/100 PARTIAL          3
-Windows / WSL             76/100 PARTIAL          3
-macOS / zsh               56/100 PARTIAL          4
-macOS / bash              56/100 PARTIAL          4
-Linux / bash              56/100 PARTIAL          4
-Linux / zsh               56/100 PARTIAL          4
+Windows / PowerShell      43/100 BLOCKED          3
+Windows / CMD              3/100 BLOCKED          5
+Windows / Git Bash        78/100 PARTIAL          2
+Windows / WSL             78/100 PARTIAL          2
+macOS / zsh               58/100 PARTIAL          3
+macOS / bash              58/100 PARTIAL          3
+Linux / bash              58/100 PARTIAL          3
+Linux / zsh               58/100 PARTIAL          3
 
-7 portability issues found (0 ignored)
+6 portability issues found (0 ignored)
+
+Findings
 ```
 
 这些 score 是确定且可解释的。以上是仓库内置的 mixed-platform fixture 示例，不代表每个仓库都会得到相同结果。
@@ -157,7 +162,7 @@ agent-xplat test .
 agent-xplat init-ci
 ```
 
-生成的 workflow 会在 `windows-latest`、`macos-latest` 和 `ubuntu-latest` 上运行，安装项目、运行测试、执行静态扫描、调用受控运行时验证、生成 JSON/SARIF/Markdown artifact，并将 SARIF 上传到 Code Scanning。仅仅在本地存在 workflow 文件，并不能证明 hosted jobs 已通过；在声明跨操作系统验证之前，仓库必须实际运行这些 jobs。
+生成的使用者工作流只安装扫描器，在 Ubuntu 上进行静态分析，以 PR 基础提交比较新增问题，输出 Job Summary 和 JSON/SARIF/Markdown 附件，仅需 `contents: read`。它不会安装或执行被扫描项目。扫描器自身的开发 CI 仍保留 Windows/macOS/Linux 测试。预览版安装、基线和证据边界见 [CI 接入说明](docs/CI_ADOPTION.md)。
 
 ## 🧭 基线与差异模式
 

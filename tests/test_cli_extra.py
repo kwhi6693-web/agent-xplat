@@ -41,3 +41,24 @@ def test_scan_does_not_execute_target_python(tmp_path: Path):
     (tmp_path / "danger.py").write_text("from pathlib import Path\nPath('created-by-execution.txt').write_text('bad')\n", encoding="utf-8")
     assert main(["scan", str(tmp_path), "--format", "json"]) == 0
     assert not marker.exists()
+
+
+def test_diff_baseline_only_allows_existing_errors(tmp_path):
+    (tmp_path / 'SKILL.md').write_text('chmod +x run.sh\n')
+    assert _git(tmp_path, 'init').returncode == 0
+    assert _git(tmp_path, 'add', '.').returncode == 0
+    assert _git(tmp_path, 'commit', '-m', 'base').returncode == 0
+    assert main(['scan', str(tmp_path), '--diff', 'HEAD', '--baseline-only']) == 0
+    (tmp_path / 'SKILL.md').write_text('# Added heading\n\nchmod +x run.sh\n')
+    assert main(['scan', str(tmp_path), '--diff', 'HEAD', '--baseline-only']) == 0
+    (tmp_path / 'SKILL.md').write_text('chmod +x run.sh\nchmod +x run.sh\n')
+    assert main(['scan', str(tmp_path), '--diff', 'HEAD', '--baseline-only']) == 1
+
+
+def test_baseline_only_respects_severity_threshold(tmp_path):
+    (tmp_path / 'SKILL.md').write_text('echo ok\n')
+    assert main(['baseline', str(tmp_path)]) == 0
+    (tmp_path / 'SKILL.md').write_text('Use /tmp/cache\n')
+    assert main(['scan', str(tmp_path), '--baseline-only']) == 0
+    (tmp_path / 'SKILL.md').write_text('chmod +x run.sh\n')
+    assert main(['scan', str(tmp_path), '--baseline-only']) == 1

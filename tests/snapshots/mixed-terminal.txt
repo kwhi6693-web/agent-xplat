@@ -4,16 +4,16 @@ Agent Workflow Portability
 Compatibility Matrix
 ---------------------
 Environment                Score Status    Findings
-Windows / PowerShell      41/100 BLOCKED          4
-Windows / CMD              1/100 BLOCKED          6
-Windows / Git Bash        76/100 PARTIAL          3
-Windows / WSL             76/100 PARTIAL          3
-macOS / zsh               56/100 PARTIAL          4
-macOS / bash              56/100 PARTIAL          4
-Linux / bash              56/100 PARTIAL          4
-Linux / zsh               56/100 PARTIAL          4
+Windows / PowerShell      43/100 BLOCKED          3
+Windows / CMD              3/100 BLOCKED          5
+Windows / Git Bash        78/100 PARTIAL          2
+Windows / WSL             78/100 PARTIAL          2
+macOS / zsh               58/100 PARTIAL          3
+macOS / bash              58/100 PARTIAL          3
+Linux / bash              58/100 PARTIAL          3
+Linux / zsh               58/100 PARTIAL          3
 
-7 portability issues found (0 ignored)
+6 portability issues found (0 ignored)
 
 Findings
 --------
@@ -47,12 +47,6 @@ SKILL.md:4:26 AX-SHELL-003 [ERROR/HIGH]
   Affected: windows-powershell, windows-cmd
   Reason: POSIX temporary environment assignment before a command is not accepted by native Windows shells.
   Suggested remediation: Use a cross-shell launcher or set the environment through the host runtime.
-SKILL.md:4:36 AX-SHELL-010 [INFO/LOW]
-  For PowerShell set `$env:MODE=fast`; for Bash use `MODE=fast node build.js`.
-                                     ^
-  Affected: windows-powershell, windows-cmd, windows-git-bash, windows-wsl, macos-zsh, macos-bash, linux-bash, linux-zsh
-  Reason: Semicolon command chaining has shell-specific parsing and error-propagation semantics.
-  Suggested remediation: Use separate commands with explicit error handling where portability matters.
 SKILL.md:4:62 AX-RUNTIME-001 [INFO/LOW]
   For PowerShell set `$env:MODE=fast`; for Bash use `MODE=fast node build.js`.
                                                                ^^^^

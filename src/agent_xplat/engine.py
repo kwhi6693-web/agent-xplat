@@ -12,6 +12,7 @@ from .contracts import evaluate_contract
 from .discovery import _is_excluded, discover_files
 from .environments import TARGETS
 from .models import Finding, ScanResult
+from .provenance import source_identity
 from .scoring import score_findings
 from .suppression import apply_suppressions
 from .rules import analyze_source
@@ -34,6 +35,7 @@ def scan(root: Path, config: Config | None = None) -> ScanResult:
     contract = evaluate_contract(config, scores, findings)
     summary = {
         "files_scanned": len(sources),
+        "source_identity": source_identity(root, sources),
         "findings": len([finding for finding in findings if not finding.ignored]),
         "ignored_findings": len([finding for finding in findings if finding.ignored]),
         "blockers": len([finding for finding in findings if not finding.ignored and finding.severity.value == "BLOCKER"]),

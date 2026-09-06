@@ -27,3 +27,22 @@ def test_diff_compares_before_and_after_scores(tmp_path: Path):
     assert result["regression"] is True
     assert result["scores"]["windows-powershell"]["before"] == 100
     assert result["scores"]["windows-powershell"]["after"] < 100
+
+
+def test_new_baseline_ignores_line_shift_but_counts_duplicate_occurrences(tmp_path):
+    path = tmp_path / 'SKILL.md'
+    path.write_text('chmod +x run.sh\n')
+    base = baseline_document(scan(tmp_path, Config()))
+    path.write_text('# Heading\n\nchmod +x run.sh\n')
+    assert compare_baseline(scan(tmp_path, Config()), base)['new_count'] == 0
+    path.write_text('chmod +x run.sh\nchmod +x run.sh\n')
+    assert compare_baseline(scan(tmp_path, Config()), base)['new_count'] == 1
+
+
+def test_legacy_baseline_still_matches(tmp_path):
+    (tmp_path / 'SKILL.md').write_text('chmod +x run.sh\n')
+    result = scan(tmp_path, Config())
+    base = baseline_document(result)
+    for item in base['findings']:
+        del item['match_key']
+    assert compare_baseline(result, base)['new_count'] == 0
