@@ -7,8 +7,8 @@ import re
 from ..environments import is_native_windows
 from ..models import Confidence, Severity, Finding, SourceFile
 from ..parsers import javascript_suffixes
-from .markdown_shell import shell_examples
 from .common import RuleContext, RuleSpec, line_matches, make_finding
+from .source_context import command_text_source, is_python_shell_corpus, reachability_filter
 
 
 POSIX_COMMANDS = "grep|sed|awk|find|which|rm|cp|mv|touch|cat|head|tail|xargs|chown"
@@ -54,11 +54,18 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
     if source.path.suffix.lower() in javascript_suffixes():
         return []
     original = source
-    source = shell_examples(source)
+    source = command_text_source(source)
     findings: list[Finding] = []
+    corpus_trusted = is_python_shell_corpus(source)
+
+    def shell_like(line: str, src: SourceFile = source) -> bool:
+        if corpus_trusted:
+            return True
+        return _shell_like(line, src)
+
     native_windows = _native_windows(context)
     for line_index, line, match in line_matches(source, r"\bchmod\s+(?:[+\-][rwxXst]+\s+)?[^\s`]+", re.IGNORECASE):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         findings.append(
             make_finding(
@@ -68,7 +75,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, rf"\b(?:{POSIX_COMMANDS})\b", re.IGNORECASE):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         command = match.group(0)
         findings.append(
@@ -79,7 +86,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"\bexport\s+[A-Za-z_][A-Za-z0-9_]*\s*=", re.IGNORECASE):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         findings.append(
             make_finding(
@@ -89,7 +96,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"\$env:[A-Za-z_][A-Za-z0-9_]*", re.IGNORECASE):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         affected = tuple(target.id for target in context.targets if target.shell != "powershell")
         findings.append(
@@ -100,7 +107,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"%[A-Za-z_][A-Za-z0-9_]*%"):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         affected = tuple(target.id for target in context.targets if target.shell != "cmd")
         findings.append(
@@ -111,7 +118,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"(?<![\w.])(?:source\s+[^\s`]+|\.\s+[^\s`]+)", re.IGNORECASE):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         findings.append(
             make_finding(
@@ -121,7 +128,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"(?<![|])(?:&&|\|\|)(?![|])"):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         affected = tuple(target.id for target in context.targets if target.id == "windows-powershell")
         findings.append(
@@ -132,7 +139,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)=[^\s]+(?=\s+[^=\s]+)"):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         prefix = line[: match.start()].rstrip().lower()
         if prefix.endswith(("export", "set", "$env:")):
@@ -146,7 +153,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"\bwhere\s+(?:node|python|npm|git)\b", re.IGNORECASE):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         affected = tuple(target.id for target in context.targets if target.id != "windows-cmd")
         findings.append(
@@ -157,7 +164,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r"\bset\s+[A-Za-z_][A-Za-z0-9_]*=", re.IGNORECASE):
-        if not _shell_like(line, source):
+        if not shell_like(line, source):
             continue
         affected = tuple(target.id for target in context.targets if target.id != "windows-cmd")
         findings.append(
@@ -168,7 +175,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
             )
         )
     for line_index, line, match in line_matches(source, r";"):
-        if not _shell_like(line, source) or not _is_unquoted(line, match.start()):
+        if not shell_like(line, source) or not _is_unquoted(line, match.start()):
             continue
         if not line[match.end():].strip():
             continue
@@ -183,4 +190,9 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
     for finding in findings:
         if finding is not None:
             finding.code = original.lines[finding.location.line - 1].strip()
-    return [finding for finding in findings if finding is not None]
+    return [
+        finding
+        for finding in findings
+        if finding is not None
+        and reachability_filter(source, finding.affected_targets, finding.location.line - 1)
+    ]
