@@ -10,13 +10,11 @@ import tempfile
 from pathlib import Path
 
 from .models import ScanResult
+from .baseline import baseline_document, match_findings
 
 
 def compare_scans(before: ScanResult, after: ScanResult) -> dict[str, Any]:
-    before_fingerprints = {finding.fingerprint for finding in before.active_findings}
-    after_fingerprints = {finding.fingerprint for finding in after.active_findings}
-    new = sorted(after_fingerprints - before_fingerprints)
-    resolved = sorted(before_fingerprints - after_fingerprints)
+    new, existing, resolved = match_findings(after.active_findings, baseline_document(before)["findings"])
     scores: dict[str, Any] = {}
     regression = False
     for target in after.targets:
@@ -28,6 +26,8 @@ def compare_scans(before: ScanResult, after: ScanResult) -> dict[str, Any]:
         "before_findings": len(before.active_findings),
         "after_findings": len(after.active_findings),
         "new": new,
+        "existing": existing,
+        "existing_count": len(existing),
         "resolved": resolved,
         "new_count": len(new),
         "resolved_count": len(resolved),

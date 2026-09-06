@@ -36,6 +36,9 @@ jobs:
       - name: Markdown report
         if: always()
         run: python -m agent_xplat report . --output agent-xplat-report.md
+      - name: Publish job summary
+        if: always()
+        run: python -c "import os,pathlib; p=pathlib.Path('agent-xplat-report.md'); f=open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8'); f.write(p.read_text(encoding='utf-8')[:900000] if p.exists() else 'Report unavailable'); f.close()"
       - name: SARIF report
         if: always()
         run: python -m agent_xplat scan . --format sarif --output agent-xplat.sarif

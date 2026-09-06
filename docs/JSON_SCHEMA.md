@@ -44,3 +44,13 @@ dependency. `RESULT_SCHEMA` exposes the same JSON Schema-compatible contract
 for consumers that want to integrate their own validator. SARIF output remains
 SARIF 2.1.0 and is validated for its driver, result, message, artifact URI, and
 positive source-region coordinates.
+
+## 1.0.2 additive evidence fields
+
+JSON schema version remains `1.0`. `summary.source_identity` adds `git_commit`
+(nullable), `worktree` (`clean`, `dirty`, `unknown`), `scanned_text_sha256`, and
+`method: static-inference`. The digest covers discovered text names/content,
+not configuration or all filesystem metadata. Existing consumers may ignore it.
+Baseline 1.0 finding entries may add `match_key` for location-independent occurrence
+matching. Old entries without it continue to use fingerprints. Diff baseline
+summaries now include `existing` and `existing_count`, alongside new/resolved data.

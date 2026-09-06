@@ -3,11 +3,19 @@
 from __future__ import annotations
 
 import json
+import html
 from collections import defaultdict
 from typing import Any
 
 from .models import Finding, ScanResult, Severity
 from .rules.registry import all_rules, get_rule
+
+
+def _md(value) -> str:
+    text = html.escape(str(value)).replace("\\", "\\\\")
+    for character in "`[]*_":
+        text = text.replace(character, "\\" + character)
+    return text
 
 
 def render_json(result: ScanResult) -> str:
@@ -99,12 +107,23 @@ def render_markdown(result: ScanResult) -> str:
     grouped: dict[str, list[str]] = defaultdict(list)
     for finding in active:
         grouped[finding.location.path].append(f"{finding.location.line}:{finding.location.column} {finding.rule_id}")
+    identity = result.summary.get("source_identity", {})
+    new_ids = set(result.baseline.get("new", []))
     lines = [
         "# Agent Xplat Report",
         "",
         "## Executive Summary",
         "",
         f"Scanned **{result.summary.get('files_scanned', 0)}** files and found **{len(active)}** active portability issues. Static results are **INFERRED**; runtime evidence is **{result.verification.get('status', 'INFERRED')}**.",
+        "",
+        f"Source commit: `{identity.get('git_commit') or 'unavailable'}`; worktree: **{identity.get('worktree', 'unknown')}**.",
+        f"Scanner: `{result.tool_version}`; scanned at: `{result.scan_timestamp}`.",
+        f"Scanned text digest: `{identity.get('scanned_text_sha256', 'unavailable')}`.",
+        "A clean static result means no known issues were detected in the scanned scope; it is not a runtime compatibility guarantee.",
+        "",
+        "## New Findings",
+        "",
+        *(_finding_markdown([f for f in active if f.fingerprint in new_ids]) if result.baseline else ["- No comparison loaded; all findings are shown below."]),
         "",
         "## Compatibility Matrix",
         "",
@@ -128,11 +147,11 @@ def render_markdown(result: ScanResult) -> str:
         "",
         "## Affected Files",
         "",
-        *([f"- `{path}` — {', '.join(items)}" for path, items in sorted(grouped.items())] or ["- None"]),
+        *([f"- <code>{html.escape(path)}</code> — {', '.join(items)}" for path, items in sorted(grouped.items())] or ["- None"]),
         "",
         "## Suggested Fixes",
         "",
-        *([f"- **{finding.rule_id}**: {finding.remediation}" for finding in active] or ["- None"]),
+        *([f"- **{finding.rule_id}**: {_md(finding.remediation)}" for finding in active] or ["- None"]),
         "",
         "## Verification Evidence",
         "",
@@ -159,7 +178,7 @@ def _finding_markdown(findings: list[Finding]) -> list[str]:
     if not findings:
         return ["- None"]
     return [
-        f"- `{finding.location.path}:{finding.location.line}:{finding.location.column}` **{finding.rule_id}** ({finding.severity.value}, {finding.confidence.value}) — {finding.reason} Remediation: {finding.remediation}"
+        f"- <code>{html.escape(finding.location.path)}:{finding.location.line}:{finding.location.column}</code> **{finding.rule_id}** ({finding.severity.value}, {finding.confidence.value}; INFERRED) — {_md(finding.reason)} Affected: {', '.join(finding.affected_targets)}. Remediation: {_md(finding.remediation)}"
         for finding in findings
     ]
 

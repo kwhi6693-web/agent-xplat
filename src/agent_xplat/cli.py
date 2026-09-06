@@ -63,9 +63,10 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser = subparsers.add_parser("init", help="create a starter .agent-xplat.yml")
     init_parser.add_argument("path", nargs="?", default=".")
     init_parser.add_argument("--force", action="store_true")
-    ci_parser = subparsers.add_parser("init-ci", help="create a three-OS GitHub Actions workflow")
+    ci_parser = subparsers.add_parser("init-ci", help="create an external-repository static GitHub Actions workflow")
     ci_parser.add_argument("path", nargs="?", default=".")
     ci_parser.add_argument("--force", action="store_true")
+    ci_parser.add_argument("--tool-ref", help="pin an unreleased scanner to its full commit SHA")
     badge_parser = subparsers.add_parser("badge", help="create a truthful static/runtime status badge")
     badge_parser.add_argument("path", nargs="?", default=".")
     badge_parser.add_argument("--runtime-verified", action="store_true")
@@ -105,12 +106,14 @@ def _result_for(path: str, *, no_baseline: bool = False):
 
 
 def _scan_exit_code(result, config, *, baseline_only: bool = False, diff_data: dict | None = None) -> int:
-    if diff_data and diff_data.get("regression"):
-        return 1
     if result.contract.get("status") == "VIOLATION":
         return 1
     if baseline_only and result.baseline:
-        return 1 if result.baseline.get("new_count", 0) else 0
+        new = set(result.baseline.get("new", []))
+        return int(any(f.fingerprint in new and f.severity.value in config.fail_on
+                       for f in result.active_findings))
+    if diff_data and diff_data.get("regression"):
+        return 1
     active = [finding for finding in result.active_findings if finding.severity.value in set(config.fail_on)]
     return 1 if active else 0
 
@@ -165,10 +168,11 @@ def _dispatch(args: argparse.Namespace) -> int:
         print(f"Wrote {path}")
         return 0
     if args.command == "init-ci":
-        path = write_ci(Path(args.path), force=args.force)
+        path = write_ci(Path(args.path), force=args.force, tool_ref=args.tool_ref)
         print(f"Wrote {path}")
         return 0
     if args.command == "badge":
+        root, _, result = _result_for(args.path)
         if args.runtime_verified:
             evidence_path = Path(args.path).resolve() / "agent-xplat-verification.json"
             if not evidence_path.exists():
@@ -180,7 +184,21 @@ def _dispatch(args: argparse.Namespace) -> int:
             verified_os = {str(value).lower() for value in evidence.get("verified_os", [])}
             if evidence.get("status") != "VERIFIED" or not {"windows", "macos", "linux"}.issubset(verified_os):
                 raise ValueError("--runtime-verified requires VERIFIED evidence for windows, macos, and linux")
-        path = write_badge(Path(args.path), runtime_verified=args.runtime_verified)
+            identity = result.summary["source_identity"]
+            if not identity["git_commit"] or identity["worktree"] != "clean":
+                raise ValueError("runtime badge requires a clean committed source tree")
+            if evidence.get("source_commit") != identity["git_commit"] or evidence.get("tool_version") != __version__:
+                raise ValueError("runtime evidence must match the current source commit and scanner version")
+            runs = evidence.get("runs", [])
+            checked = {run.get("os") for run in runs if isinstance(run, dict)
+                       and run.get("status") == "VERIFIED" and run.get("exit_code") == 0
+                       and run.get("source_commit") == identity["git_commit"]
+                       and run.get("tool_version") == __version__ and run.get("command")
+                       and run.get("evidence_url")}
+            if not {"windows", "macos", "linux"}.issubset(checked):
+                raise ValueError("runtime evidence needs successful source-bound command records for all three OSes")
+        emit(render_json(result), str(root / "agent-xplat-badge.json"))
+        path = write_badge(root, runtime_verified=args.runtime_verified)
         print("Static Checked" if not args.runtime_verified else "Cross-OS Verified")
         print(f"Wrote {path}")
         return 0

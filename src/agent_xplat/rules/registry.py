@@ -104,8 +104,10 @@ def analyze_source(source: SourceFile, config: Config) -> list[Finding]:
     context = RuleContext(config, tuple(target for target in TARGETS if target.id in config.targets))
     specs = {rule.rule_id: rule for rule in _RULES}
     findings_by_fingerprint: dict[str, Finding] = {}
-    for rule in _RULES:
-        for finding in rule.detector(source, context, specs):
+    # Each detector emits its whole family; run it once, not once per rule.
+    detectors = dict.fromkeys(rule.detector for rule in _RULES)
+    for detector in detectors:
+        for finding in detector(source, context, specs):
             if finding is not None:
                 findings_by_fingerprint[finding.fingerprint] = finding
     findings = list(findings_by_fingerprint.values())

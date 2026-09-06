@@ -92,3 +92,34 @@ jobs:
     )
     findings = analyze_source(source_file_from_path(workflow, tmp_path), Config())
     assert "AX-TOOL-001" not in {finding.rule_id for finding in findings}
+
+
+def test_markdown_prose_and_agent_invocation_are_not_shell(tmp_path):
+    text = '''Many skills are open source (`Apache 2.0`).
+Enable `public` by default; do not find problems in prose.
+Install the `$skill-installer` skill.
+```
+$skill-installer gh-address-comments
+```
+```python
+value = "$VARIABLE"
+```
+| Name | Example |
+| --- | --- |
+| source | `public` |
+'''
+    path = tmp_path / 'SKILL.md'
+    path.write_text(text)
+    findings = analyze_source(source_file_from_path(path, tmp_path), Config())
+    assert not [f for f in findings if f.rule_id.startswith(('AX-SHELL-', 'AX-QUOTE-'))]
+
+
+def test_markdown_keeps_actual_shell_commands_and_locations(tmp_path):
+    path = tmp_path / 'SKILL.md'
+    path.write_text('Run `chmod +x run.sh` now.\n```bash\nexport MODE=fast\necho "$MODE"\n```\n')
+    findings = analyze_source(source_file_from_path(path, tmp_path), Config())
+    chmod = next(f for f in findings if f.rule_id == 'AX-SHELL-001')
+    assert (chmod.location.line, chmod.location.column) == (1, 6)
+    assert chmod.code == 'Run `chmod +x run.sh` now.'
+    assert any(f.rule_id == 'AX-SHELL-003' and f.location.line == 3 for f in findings)
+    assert any(f.rule_id == 'AX-QUOTE-004' and f.location.line == 4 for f in findings)

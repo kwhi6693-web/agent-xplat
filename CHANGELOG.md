@@ -2,6 +2,19 @@
 
 All notable changes to agent-xplat are documented here.
 
+## [Unreleased] — 1.0.2 candidate
+
+- Generate a consumer workflow that installs only the scanner, uses isolated Python,
+  compares PRs with their base commit, preserves reports, and needs only contents:read.
+- Match new baselines across line shifts while preserving duplicate occurrences and
+  legacy fingerprint-only baselines. New-only gates honor fail_on severity.
+- Restrict Markdown shell/quoting rules to command examples; avoid prose, tables,
+  agent invocations and explicitly non-shell fences. Run each detector family once.
+- Add source commit/worktree/text digest and a new-findings section to Markdown reports.
+- Produce evidence alongside static badges and require source-bound runtime records.
+- Record a pinned ten-repository exploratory study, including unresolved false positives.
+- No release or universal-compatibility claim is made by this candidate.
+
 ## [1.0.1] - 2026-09-02
 
 ### Changed

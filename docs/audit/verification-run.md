@@ -269,3 +269,43 @@ Evidence classification:
 MANUAL ACTION: GitHub Social Preview itself is uploaded at repository `Settings` → `General` → `Social preview` → `Upload an image`; the repository-ready PNG is the asset recorded above. This UI setting is optional for repository launch readiness and was not changed by the repository commit.
 
 Governance: Final Governance applicability was `REQUIRED` for the explicitly authorized public branch asset write. The current user request supplied the authority, destination readback matched the intended state, no waiver was used, and no Release/PyPI publication mutation was performed.
+
+## Adoption candidate — 2026-09-05
+
+- Starting source: `6ca6c8fcfdfc515f8e8bcb4e456a683b09b43549`, clean checkout;
+  isolated branch `feat/portability-adoption-evidence`.
+- Environment: Linux, Python 3.12; baseline isolated editable install succeeded;
+  baseline `python -m pytest -q`: **88 passed**.
+- Candidate `python -m pytest -q`: **98 passed in 1.06s**. This includes execution
+  of the emitted consumer scan/summary/gate shell steps against an unrelated Git
+  fixture containing import traps, without executing its source.
+- Candidate wheel build: `python -m pip wheel . --no-deps --wheel-dir <external>`:
+  exit 0, `agent_xplat-1.0.2-py3-none-any.whl`, SHA-256
+  `5d502d0e6b7a199b74a166da2233f8e7c1709a42ef32b7c9c8af9cad271ac8d7`.
+- Snapshot change reviewed: removed a prose semicolon incorrectly treated as a
+  command chain. Existing detector fixtures continue to pass.
+- Ten pinned repository scans: all completed with valid reports; exit 1 denotes
+  the configured finding gate, not a crash. Manual review: 25 false positives,
+  5 intentional platform designs; 22 of the sampled false positives removed.
+  See `real-world-study.md` and `real-world-study.json`; no third-party code ran.
+- Local `git diff --check`: exit 0. Reports contain public source references only;
+  large raw reports/third-party repositories are outside the tracked project.
+- Remote candidate Windows/macOS/Linux CI: pending at this local record. Historical
+  runner success is not reused as proof for this candidate. No release performed.
+- Broad low-noise adoption remains unvalidated: three reviewed false positives and
+  platform-context findings remain, and the sample is not a precision estimate.
+
+### Final local delivery and remote blocker
+
+- Clean wheel installed into a second isolated venv. `python -I -m agent_xplat`
+  verified version 1.0.2, all ten subcommand help routes, existing/new baseline
+  gates, JSON/Markdown/SARIF output and pinned CI generation: exit 0.
+- Candidate code commit: `e65fd4eb332ad960a6a9dddbc8179f423ac9649a`.
+- Local controlled runtime check: Linux/Bash, project pytest command, exit 0,
+  **98 passed in 1.05s**. This is evidence for the recorded host only.
+- Remote Git push failed: no HTTPS username/credential available.
+- Authenticated GitHub connector create-tree request failed with HTTP 403,
+  `Resource not accessible by integration`. No remote branch or PR was created.
+- Windows/macOS candidate runs: **NOT EXECUTED**. Draft PR and hosted CI are
+  **BLOCKED BY WRITE ACCESS**, not passed. Local code and reviewable patch are
+  complete; formal release readiness is **IMPLEMENTED BUT NOT VERIFIED**.
