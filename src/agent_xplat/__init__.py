@@ -1,3 +1,3 @@
 """Cross-OS portability analysis for AI-agent workflows."""
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"

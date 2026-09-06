@@ -2,7 +2,7 @@
 
 All notable changes to agent-xplat are documented here.
 
-## [Unreleased]
+## [1.0.3] - 2026-09-06
 
 ### Changed
 
