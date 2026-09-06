@@ -141,6 +141,62 @@ def main() -> None:
     assert not [f for f in findings if f.rule_id.startswith(("AX-SHELL-", "AX-QUOTE-"))]
 
 
+def test_python_import_aliases_keep_shell_execution_detection(tmp_path: Path):
+    """from-import aliases and module aliases stay detectable."""
+    bodies = [
+        "import subprocess as sp\n\n\nsp.run('NODE_ENV=production node build.js', shell=True)\n",
+        "from subprocess import run as sub_run\n\n\nsub_run('NODE_ENV=production node build.js', shell=True)\n",
+        "import os as operating_system\n\n\noperating_system.system('MODE=production node build.js')\n",
+        "from os import system as os_system\n\n\nos_system('MODE=production node build.js')\n",
+    ]
+    for body in bodies:
+        findings = _scan(tmp_path, "aliased.py", body)
+        matches = [f for f in findings if f.rule_id == "AX-SHELL-003"]
+        assert matches, body
+        assert matches[0].location.line == 4
+
+
+def test_python_cross_interpreter_strings_inside_subprocess_stay_detected(tmp_path: Path):
+    """A bash -c / cmd /c command string passed to subprocess is real
+    shell-execution text; its inner assignments must still be reported."""
+    findings = _scan(
+        tmp_path,
+        "cross.py",
+        """import subprocess
+
+
+def run_bash() -> None:
+    subprocess.run('bash -c "FOO=bar echo hi"', shell=True)
+
+
+def run_cmd() -> None:
+    subprocess.run('cmd /c "echo %FOO%"', shell=True)
+""",
+    )
+    assert [f for f in findings if f.rule_id == "AX-SHELL-003"]
+    assert [f for f in findings if f.rule_id == "AX-SHELL-005"]
+
+
+def test_python_dynamic_command_strings_are_a_documented_limit(tmp_path: Path):
+    """Concatenated and variable-built commands are not statically
+    resolvable; they must not fire (documented limitation), while the
+    code lines themselves must not become shell text either."""
+    findings = _scan(
+        tmp_path,
+        "dynamic.py",
+        """import subprocess
+
+
+def main(name: str) -> None:
+    subprocess.run('NODE_ENV=production ' + name, shell=True)
+    command = 'MODE=production node build.js'
+    subprocess.run(command, shell=True)
+    subprocess.run(f'MODE=production {name}', shell=True)
+""",
+    )
+    assert not [f for f in findings if f.rule_id.startswith(("AX-SHELL-", "AX-QUOTE-"))]
+
+
 # --- B. Workflow run blocks follow the job executor ----------------------
 
 _BASH_STEP = """name: ci
@@ -226,6 +282,33 @@ jobs:
     matches = [f for f in findings if f.rule_id == "AX-SHELL-003"]
     assert matches
     assert "windows-powershell" in matches[0].affected_targets
+
+
+def test_workflow_matrix_include_with_os_is_unprovable_and_keeps_findings(tmp_path: Path):
+    """matrix.include entries that add os combinations cannot be enumerated
+    cheaply, so the executor is unprovable and the historical behavior
+    (keep findings) applies."""
+    findings = _scan(
+        tmp_path,
+        ".github/workflows/ci.yml",
+        """name: ci
+on: [push]
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        include:
+          - os: windows-latest
+            extra: true
+    steps:
+      - run: |
+          FOO=bar echo hi
+""",
+    )
+    matches = [f for f in findings if f.rule_id == "AX-SHELL-003"]
+    assert matches
 
 
 def test_workflow_unprovable_runner_keeps_historical_behavior(tmp_path: Path):

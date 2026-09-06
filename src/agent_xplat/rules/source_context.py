@@ -260,12 +260,14 @@ def _workflow_executor_context(source: SourceFile) -> dict[int, frozenset[str] |
             if content == "strategy:":
                 probe = index + 1
                 matrix_oses: list[str] = []
+                include_adds_os = False
                 while probe < section_end and _indent_of(text[probe]) >= 6:
                     if _indent_of(text[probe]) == 6 and text[probe].strip().startswith("matrix:"):
                         inner = probe + 1
                         while inner < section_end and _indent_of(text[inner]) >= 8:
-                            if _indent_of(text[inner]) == 8 and text[inner].strip().startswith("os:"):
-                                os_line = text[inner].strip().split(":", 1)[1]
+                            content_inner = text[inner].strip()
+                            if _indent_of(text[inner]) == 8 and content_inner.startswith("os:"):
+                                os_line = content_inner.split(":", 1)[1]
                                 if os_line.strip():
                                     matrix_oses.append(os_line)
                                 list_probe = inner + 1
@@ -273,13 +275,30 @@ def _workflow_executor_context(source: SourceFile) -> dict[int, frozenset[str] |
                                     matrix_oses.append(text[list_probe])
                                     list_probe += 1
                                 inner = list_probe
+                            elif _indent_of(text[inner]) == 8 and content_inner.startswith("include:"):
+                                # include entries can add or override matrix
+                                # combinations (including os); combinations
+                                # beyond the os cross product cannot be
+                                # enumerated cheaply, so treat any os-bearing
+                                # include as an unprovable executor.
+                                include_probe = inner + 1
+                                while include_probe < section_end and _indent_of(text[include_probe]) == 10 and text[include_probe].strip().startswith("- "):
+                                    entry = text[include_probe].strip()[2:]
+                                    if re.search(r"(^|\s)os\s*:", entry, re.IGNORECASE):
+                                        include_adds_os = True
+                                    include_probe += 1
+                                inner = include_probe
                             else:
                                 inner += 1
                         probe = inner
                         break
                     probe += 1
-                if matrix_oses:
+                if matrix_oses and not include_adds_os:
                     run_oses = _runner_oses(matrix_oses)
+                elif include_adds_os:
+                    # os-bearing include: combinations unknown => conservative
+                    # historical behavior for this job's run blocks.
+                    run_oses = None
                 index = probe
                 continue
             if content == "steps:":
@@ -355,12 +374,26 @@ def command_text_source(source: SourceFile) -> SourceFile:
     if source.path.suffix.lower() == ".md":
         return shell_examples(source)
     if source.path.suffix.lower() == _PY_SUFFIX:
-        return _python_string_text_source(source)
+        masked = _python_string_text_source(source)
+        masked.exec_context = {"python_shell_corpus": True}
+        return masked
     return source
 
 
+def is_python_shell_corpus(source: SourceFile) -> bool:
+    """True when the source is the Python shell-execution corpus view.
+
+    Every remaining line of such a source was already vetted by the AST
+    extractor as string text of an explicit shell-execution call, so the
+    line-prefix heuristics that guard Markdown/prose no longer apply.
+    """
+    return bool(source.exec_context and source.exec_context.get("python_shell_corpus"))
+
+
 _SHELL_EXEC_MODULES = {"os", "subprocess"}
-_SHELL_EXEC_FUNCS = {"system", "popen", "run", "call", "Popen", "check_call", "check_output"}
+_OS_SHELL_EXEC_FUNCS = {"system", "popen"}
+_SUBPROCESS_SHELL_EXEC_FUNCS = {"run", "call", "Popen", "check_call", "check_output"}
+_SHELL_EXEC_FUNCS = _OS_SHELL_EXEC_FUNCS | _SUBPROCESS_SHELL_EXEC_FUNCS
 
 
 def _python_shell_strings(source: SourceFile) -> list[tuple[str, int, int]]:
@@ -370,12 +403,16 @@ def _python_shell_strings(source: SourceFile) -> list[tuple[str, int, int]]:
     Supported call shapes (literal string arguments only):
     - ``subprocess.run("cmd", ...)`` / ``subprocess.call`` / ``Popen`` /
       ``check_call`` / ``check_output`` (also via ``from subprocess import
-      run`` and common aliases such as ``import subprocess as sp``)
-    - ``os.system("cmd")`` / ``os.popen("cmd")``
+      run`` and via module aliases such as ``import subprocess as sp``)
+    - ``os.system("cmd")`` / ``os.popen("cmd")`` (also with ``os`` aliases
+      and ``from os import system`` import forms)
 
-    Strings inside docstrings, error messages, or other application text
-    are intentionally not corpus: their language is unknown, so the
-    conservative choice is no shell detection.
+    Import aliases are resolved structurally from the module's import
+    statements; rebinding an imported name to another function later in the
+    module is not tracked (documented limitation).  Strings inside
+    docstrings, error messages, or other application text are intentionally
+    not corpus: their language is unknown, so the conservative choice is no
+    shell detection.
     """
     import ast
 
@@ -384,33 +421,54 @@ def _python_shell_strings(source: SourceFile) -> list[tuple[str, int, int]]:
         tree = ast.parse(source.text)
     except SyntaxError:
         return results
+
+    module_aliases: dict[str, str] = {}
+    function_aliases: dict[str, tuple[str, str]] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name in _SHELL_EXEC_MODULES:
+                    module_aliases[alias.asname or alias.name] = alias.name
+        elif isinstance(node, ast.ImportFrom) and node.module in _SHELL_EXEC_MODULES:
+            for alias in node.names:
+                if alias.name in _SHELL_EXEC_FUNCS:
+                    function_aliases[alias.asname or alias.name] = (node.module, alias.name)
+
+    def module_name_for(value: ast.AST) -> str | None:
+        if isinstance(value, ast.Name):
+            return module_aliases.get(value.id, value.id)
+        return None
+
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
         function = node.func
-        name: str | None = None
         module: str | None = None
+        func_name: str | None = None
         if isinstance(function, ast.Attribute):
-            name = function.attr
-            value = function.value
-            if isinstance(value, ast.Name):
-                module = value.id
-            elif isinstance(value, ast.Attribute):
-                module = value.attr
+            func_name = function.attr
+            if isinstance(function.value, ast.Name):
+                module = module_name_for(function.value)
         elif isinstance(function, ast.Name):
-            name = function.id
-        if name is None or name not in _SHELL_EXEC_FUNCS:
+            bound = function_aliases.get(function.id)
+            if bound is not None:
+                module, func_name = bound
+            else:
+                func_name = function.id
+        if func_name is None:
             continue
-        if module is not None and module not in _SHELL_EXEC_MODULES:
-            continue
-        # Common alias: ``import subprocess as sp`` binds Name('sp') with
-        # Attribute(attr='run'); allow any attribute name when the parent is
-        # an os/subprocess import alias is not resolvable cheaply, so only
-        # require the function-name family plus (when a module is visible)
-        # os/subprocess.  A bare Name like ``run("x")`` is accepted only for
-        # the unambiguous os.system/popen family names when no module is
-        # visible, to avoid claiming arbitrary local functions are shells.
-        if module is None and name not in {"system", "popen", "Popen", "run", "call", "check_call", "check_output"}:
+        if module is not None:
+            if module == "os" and func_name not in _OS_SHELL_EXEC_FUNCS:
+                continue
+            if module == "subprocess" and func_name not in _SUBPROCESS_SHELL_EXEC_FUNCS:
+                continue
+            if module not in _SHELL_EXEC_MODULES:
+                continue
+        elif func_name not in _SHELL_EXEC_FUNCS:
+            # Unbound bare name (no import evidence): accept only the
+            # unambiguous subprocess family names so a local helper named
+            # e.g. ``call`` is not claimed; shell-shaped string content is
+            # still required by the shell rules before anything fires.
             continue
         for argument in [node.args[0]] if node.args else []:
             if isinstance(argument, ast.Constant) and isinstance(argument.value, str):

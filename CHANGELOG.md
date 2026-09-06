@@ -42,6 +42,15 @@ All notable changes to agent-xplat are documented here.
   unknown, and the conservative choice is no shell detection there. Commands
   that are built dynamically or passed through variables remain undetected by
   design (static literal strings only).
+- Import aliases (`import subprocess as sp`, `from subprocess import run as
+  sub_run`, `from os import system as os_system`) are resolved structurally;
+  rebinding an imported name later in the module is not tracked.
+- Shell-corpus lines that came from a Python shell-execution string skip the
+  prose-guard line-prefix heuristics (the AST already proved the context), so
+  commands such as `bash -c "FOO=bar ..."` and `cmd /c "..."` inside
+  `subprocess`/`os` strings are detected.
+- Workflow matrix `include:` entries that add `os` combinations make the
+  executor unprovable; those jobs keep the historical behavior.
 - No rule is disabled globally; positive controls for real shell-execution
   contexts are covered by new regression tests
   (`tests/test_source_context_false_positives.py`).

@@ -11,6 +11,39 @@ Fixed corpus commits (both verified equal to their remote `main`):
 | `kwhi6693-web/photo-abstract-editorial` | `80a83a022d222593b3b7916839fe5ff27f603c60` | remote `main` at trial time; matches the previous 203-finding baseline report |
 | `kwhi6693-web/presentation-studio` | `6c03789649f8002f11a46c7b47d376336bbfee85` | remote `main` at trial time; matches the previous 8634-finding baseline report |
 
+## Self-scan note (project configuration)
+
+The repository's own `.agent-xplat.yml` excludes `src/**`, `tests/**`,
+`docs/**`, `examples/**`, `README.md`, `.github/**`, `pyproject.toml` and the
+config itself — an intentional policy that keeps the self-scan focused on
+user-facing metadata. With that policy the scan reports 0 files, which is not
+evidence of analysis. Acceptance scans below therefore run the same two tool
+versions over exported project trees **without** the project config (default
+configuration, all eight targets):
+
+| Scan | Tree | Files | Findings | Exit |
+| --- | --- | ---: | ---: | ---: |
+| 1.0.2 tool | master `2270038a0` | 96 | 921 | 1 |
+| candidate tool | master `2270038a0` | 96 | 643 | 1 |
+| candidate tool | candidate `6e469cb1` | 98 | 672 | 1 |
+
+Same tree (master) with the two tools shows the candidate removes 278
+findings; the candidate tree adds two scanned files (new tests/doc) and its
+own scan is non-zero, so the candidate never reports "0 files" as an analysis
+result. These are not defect counts; they document that scanning works on the
+project's own source.
+
+## Test-count accounting
+
+`pytest --collect-only -q` reports 118 collected items on the candidate
+commit (all function-level; no parametrization): 117 passed + 1 skipped
+(skip is the Ubuntu/bash-only CI-adoption test) on the development Python
+3.12 host. The pre-fix baseline commit collected 98 items (97 passed +
+1 skipped). The fix branch therefore adds 20 test functions:
+16 execution-context regression tests plus 4 follow-up tests (import
+aliases, cross-interpreter subprocess strings, dynamic-command limit,
+matrix-include conservatism).
+
 Commands (identical for both versions, JSON output, default configuration and
 targets, scanned from a clean detached worktree, no target code executed):
 
@@ -99,3 +132,34 @@ Zone split for presentation: workflow 1399, Python 1697, `.ps1` 333.
 - Both consumer trial PRs (photo #5, presentation #29) keep their draft and
   report mode and still run the released 1.0.2; this candidate has not been
   pointed at them.
+
+## Python behavior matrix (1.0.2 vs candidate)
+
+Probed with the same one-file-per-scenario harness against both tool
+versions; `[]` means no shell/quoting rule fired.
+
+| Scenario | 1.0.2 | Candidate | Classification |
+| --- | --- | --- | --- |
+| `subprocess.run("NODE_ENV=production node build.js", shell=True)` | — | AX-SHELL-003 | detected (new) |
+| same via `args=` keyword | — | AX-SHELL-003 | detected (new) |
+| `subprocess.run(["node","build.js"])` / `shell=False` literal | — | — | no shell syntax involved |
+| `subprocess.call("chmod +x run.sh", shell=True)` | — | AX-SHELL-001 | detected (new) |
+| `subprocess.Popen("grep foo bar", shell=True)` | — | AX-SHELL-002 | detected (new) |
+| `os.system("MODE=production node build.js")` / `os.popen` | — | AX-SHELL-003 | detected (new) |
+| `from subprocess import run; run(...)` | — | AX-SHELL-003 | detected (new) |
+| `from subprocess import run as sub_run` / `import subprocess as sp` / `import os as operating_system` / `from os import system as os_system` | — | AX-SHELL-003 | detected (new; aliases resolved structurally) |
+| static concatenation `"echo " + name` | — | — | documented limitation (not statically folded) |
+| f-string / variable-built command | — | — | documented limitation (no dataflow) |
+| multi-line and non-ASCII command strings | — | AX-SHELL-003 at the string's line | detected (new) |
+| docstring command template | AX-SHELL-003 | — | intentional: docstrings are not execution context |
+| multi-line keyword arguments (photo pattern) | AX-SHELL-003 | — | false positive removed |
+| `subprocess.run('bash -c "FOO=bar ..."')` | — | AX-SHELL-003 | detected (new) |
+| `subprocess.run('cmd /c "echo %FOO%"')` | — | AX-SHELL-005 | detected (new) |
+| `.ps1` legal `$var`/`$env:` | AX-QUOTE-004/SHELL-004 | — | language-boundary false positives removed |
+| `.cmd` `$VAR` | AX-QUOTE-004 | AX-QUOTE-004 | positive control kept |
+| `.ps1` `cmd /c "echo %VAR%"` | AX-SHELL-005 | AX-SHELL-005 | positive control kept |
+| workflow bash step (Ubuntu) `x="$(...)"`, `$var`, `$(...)`, `<<<` | AX-SHELL-003/QUOTE-002/004/005 | — | executor-scoped removal |
+| workflow Windows default shell `FOO=bar echo hi` | AX-SHELL-003 | AX-SHELL-003 | kept (PowerShell leg) |
+| workflow matrix ubuntu+windows | AX-SHELL-003 | AX-SHELL-003 | kept (Windows leg) |
+| workflow `matrix.include` adding `os` | — | AX-SHELL-003 | conservative: unprovable executor keeps findings |
+| workflow `self-hosted` / expression runs-on | AX-SHELL-003 | AX-SHELL-003 | conservative: unprovable executor keeps findings |
