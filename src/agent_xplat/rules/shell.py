@@ -7,8 +7,8 @@ import re
 from ..environments import is_native_windows
 from ..models import Confidence, Severity, Finding, SourceFile
 from ..parsers import javascript_suffixes
-from .markdown_shell import shell_examples
 from .common import RuleContext, RuleSpec, line_matches, make_finding
+from .source_context import command_text_source, reachability_filter
 
 
 POSIX_COMMANDS = "grep|sed|awk|find|which|rm|cp|mv|touch|cat|head|tail|xargs|chown"
@@ -54,7 +54,7 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
     if source.path.suffix.lower() in javascript_suffixes():
         return []
     original = source
-    source = shell_examples(source)
+    source = command_text_source(source)
     findings: list[Finding] = []
     native_windows = _native_windows(context)
     for line_index, line, match in line_matches(source, r"\bchmod\s+(?:[+\-][rwxXst]+\s+)?[^\s`]+", re.IGNORECASE):
@@ -183,4 +183,9 @@ def detect_shell(source: SourceFile, context: RuleContext, specs: dict[str, Rule
     for finding in findings:
         if finding is not None:
             finding.code = original.lines[finding.location.line - 1].strip()
-    return [finding for finding in findings if finding is not None]
+    return [
+        finding
+        for finding in findings
+        if finding is not None
+        and reachability_filter(source, finding.affected_targets, finding.location.line - 1)
+    ]

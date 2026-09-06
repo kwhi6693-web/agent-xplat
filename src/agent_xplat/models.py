@@ -70,6 +70,7 @@ class SourceFile:
     mode: int | None = None
     is_crlf: bool = False
     lines: tuple[str, ...] = field(init=False)
+    exec_context: dict[str, Any] = field(default=None, repr=False, compare=False)  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
         self.lines = tuple(self.text.splitlines())

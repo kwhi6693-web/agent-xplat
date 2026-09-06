@@ -2,7 +2,51 @@
 
 All notable changes to agent-xplat are documented here.
 
-## [Unreleased] — 1.0.2 candidate
+## [Unreleased]
+
+### Changed
+
+- Scoped shell and quoting detectors to real execution contexts, removing three
+  observed false-positive families:
+  - Python code lines (call keyword arguments, assignments, type annotations)
+    are no longer read as POSIX shell text; only string literals passed to
+    explicit shell-execution calls (`subprocess` functions, `os.system`,
+    `os.popen`) remain shell corpus.
+  - GitHub Actions `run:` blocks are scoped to the executor selected by
+    `runs-on` and the shell chain (step `shell:` > `defaults.run.shell` >
+    runner default). Explicit-bash jobs on Linux/macOS runners no longer
+    receive CMD/PowerShell-lens findings; matrix runners keep findings for
+    their Windows legs; unprovable runners (`self-hosted`, expressions) keep
+    the historical behavior.
+  - `.ps1` files are PowerShell source and `.cmd`/`.bat` files are CMD source:
+    legal native syntax (`$var`, `$env:`, `set`, `%VAR%`, `where`) is no
+    longer reported through another shell's lens, while explicit
+    cross-interpreter text (`cmd /c`, `bash -c`) and genuine errors such as
+    `$VAR` inside `.cmd` stay detected.
+- Markdown command examples and `.sh` files keep their historical scope: they
+  remain cross-shell knowledge text, so cross-platform reminders there are
+  unchanged.
+
+### Fixed
+
+- AX-SHELL-003 no longer fires on Python keyword arguments such as
+  `detail="..."` or `tempfile(..., dir=path)` (observed: 102 of 102
+  AX-SHELL-003 findings in a consumer repository were this pattern).
+- AX-SHELL-006 no longer fires on Python `source = ...` assignments.
+- AX-QUOTE-007 no longer fires on Python `X | Y` type annotations.
+- AX-QUOTE-004 no longer fires on PowerShell `$var` inside `.ps1` files.
+
+### Notes
+
+- Docstring text and ordinary strings are not shell corpus: their language is
+  unknown, and the conservative choice is no shell detection there. Commands
+  that are built dynamically or passed through variables remain undetected by
+  design (static literal strings only).
+- No rule is disabled globally; positive controls for real shell-execution
+  contexts are covered by new regression tests
+  (`tests/test_source_context_false_positives.py`).
+
+## [1.0.2] - 2026-09-06
 
 - Generate a consumer workflow that installs only the scanner, uses isolated Python,
   compares PRs with their base commit, preserves reports, and needs only contents:read.

@@ -7,8 +7,8 @@ import re
 from ..environments import is_native_windows
 from ..models import Confidence, Severity, Finding, SourceFile
 from ..parsers import javascript_suffixes
-from .markdown_shell import shell_examples
 from .common import RuleContext, RuleSpec, line_matches, make_finding
+from .source_context import command_text_source, reachability_filter
 
 
 SHELL_SUFFIXES = {".sh", ".bash", ".zsh", ".ps1", ".cmd", ".bat"}
@@ -48,7 +48,7 @@ def detect_quoting(source: SourceFile, context: RuleContext, specs: dict[str, Ru
     if source.path.suffix.lower() in javascript_suffixes():
         return []
     original = source
-    source = shell_examples(source)
+    source = command_text_source(source)
     findings: list[Finding] = []
     native_windows = tuple(target.id for target in context.targets if is_native_windows(target.id))
     for line_index, line, match in line_matches(source, r"\$\{[A-Za-z_][A-Za-z0-9_]*\}"):
@@ -122,4 +122,9 @@ def detect_quoting(source: SourceFile, context: RuleContext, specs: dict[str, Ru
     for finding in findings:
         if finding is not None:
             finding.code = original.lines[finding.location.line - 1].strip()
-    return [finding for finding in findings if finding is not None]
+    return [
+        finding
+        for finding in findings
+        if finding is not None
+        and reachability_filter(source, finding.affected_targets, finding.location.line - 1)
+    ]
