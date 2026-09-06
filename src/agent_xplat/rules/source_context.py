@@ -260,6 +260,7 @@ def _workflow_executor_context(source: SourceFile) -> dict[int, frozenset[str] |
             if content == "strategy:":
                 probe = index + 1
                 matrix_oses: list[str] = []
+                include_oses: list[str] = []
                 include_adds_os = False
                 while probe < section_end and _indent_of(text[probe]) >= 6:
                     if _indent_of(text[probe]) == 6 and text[probe].strip().startswith("matrix:"):
@@ -277,15 +278,20 @@ def _workflow_executor_context(source: SourceFile) -> dict[int, frozenset[str] |
                                 inner = list_probe
                             elif _indent_of(text[inner]) == 8 and content_inner.startswith("include:"):
                                 # include entries can add or override matrix
-                                # combinations (including os); combinations
-                                # beyond the os cross product cannot be
-                                # enumerated cheaply, so treat any os-bearing
-                                # include as an unprovable executor.
+                                # combinations (including os).  When a top-level
+                                # os cross product exists, os-bearing includes
+                                # make combinations unprovable (conservative).
+                                # When there is no top-level os key, the include
+                                # list itself enumerates every combination, so
+                                # its os values are provable.
                                 include_probe = inner + 1
                                 while include_probe < section_end and _indent_of(text[include_probe]) == 10 and text[include_probe].strip().startswith("- "):
                                     entry = text[include_probe].strip()[2:]
-                                    if re.search(r"(^|\s)os\s*:", entry, re.IGNORECASE):
+                                    match_os = re.search(r"(?:^|\s)os\s*:\s*([^\s#]+)", entry, re.IGNORECASE)
+                                    if match_os:
                                         include_adds_os = True
+                                        if not matrix_oses:
+                                            include_oses.append(match_os.group(1))
                                     include_probe += 1
                                 inner = include_probe
                             else:
@@ -295,10 +301,15 @@ def _workflow_executor_context(source: SourceFile) -> dict[int, frozenset[str] |
                     probe += 1
                 if matrix_oses and not include_adds_os:
                     run_oses = _runner_oses(matrix_oses)
-                elif include_adds_os:
-                    # os-bearing include: combinations unknown => conservative
-                    # historical behavior for this job's run blocks.
+                elif matrix_oses and include_adds_os:
+                    # Top-level os cross product combined with os-bearing
+                    # include entries: combinations cannot be enumerated
+                    # cheaply => conservative historical behavior.
                     run_oses = None
+                elif include_oses:
+                    # No top-level os key: the include list itself enumerates
+                    # every matrix combination, so its os values are provable.
+                    run_oses = _runner_oses(include_oses)
                 index = probe
                 continue
             if content == "steps:":

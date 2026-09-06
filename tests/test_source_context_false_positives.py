@@ -311,6 +311,42 @@ jobs:
     assert matches
 
 
+def test_workflow_include_only_matrix_enumerates_os(tmp_path: Path):
+    """matrix.include without a top-level os key enumerates combinations, so
+    a PowerShell step's $var is not reported through the CMD lens and a bash
+    step's $VAR is not reported for CMD either."""
+    findings = _scan(
+        tmp_path,
+        ".github/workflows/validate.yml",
+        """name: validate
+on: [pull_request]
+jobs:
+  checks:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+    steps:
+      - name: Unix environment
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+      - name: Windows environment
+        if: runner.os == 'Windows'
+        run: |
+          $venv = Join-Path $env:RUNNER_TEMP "venv"
+          Add-Content -Path $env:GITHUB_PATH -Value (Join-Path $venv "Scripts")
+""",
+    )
+    assert not [f for f in findings if f.rule_id == "AX-QUOTE-004"]
+
+
 def test_workflow_unprovable_runner_keeps_historical_behavior(tmp_path: Path):
     findings = _scan(
         tmp_path,
